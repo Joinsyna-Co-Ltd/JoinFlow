@@ -1,0 +1,179 @@
+# JoinFlow 生产环境 Docker Compose 配置
+# 企业级云服务架构
+# 使用: docker-compose -f deploy/docker-compose.prod.yml up -d
+
+version: '3.8'
+
+services:
+  # ===========================================
+  # JoinFlow 主应用
+  # ===========================================
+  joinflow:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: joinflow:latest
+    container_name: joinflow-app
+    restart: unless-stopped
+    environment:
+      - JOINFLOW_HOST=0.0.0.0
+      - JOINFLOW_PORT=8000
+      - JOINFLOW_WORKERS=${WORKERS:-2}
+      - JOINFLOW_ENV=production
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      - DEFAULT_MODEL=${DEFAULT_MODEL:-gpt-4o-mini}
+      # Redis 配置
+      - REDIS_URL=redis://redis:6379/0
+      # 数据库配置（可选）
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///./data/joinflow.db}
+    volumes:
+      - joinflow-data:/app/workspace
+      - joinflow-exports:/app/exports
+      - joinflow-sessions:/app/sessions
+      - joinflow-kb:/app/knowledge_base
+    networks:
+      - joinflow-network
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+  # ===========================================
+  # Nginx 反向代理 + SSL
+  # ===========================================
+  nginx:
+    image: nginx:alpine
+    container_name: joinflow-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+      - nginx-logs:/var/log/nginx
+    networks:
+      - joinflow-network
+    depends_on:
+      - joinflow
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ===========================================
+  # Certbot SSL 证书自动续期
+  # ===========================================
+  certbot:
+    image: certbot/certbot
+    container_name: joinflow-certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - joinflow-network
+
+  # ===========================================
+  # Redis 缓存和任务队列
+  # ===========================================
+  redis:
+    image: redis:7-alpine
+    container_name: joinflow-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - joinflow-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # 定时任务调度器（可选）
+  # ===========================================
+  scheduler:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: joinflow:latest
+    container_name: joinflow-scheduler
+    restart: unless-stopped
+    command: python -m joinflow_core.scheduler_worker
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - joinflow-data:/app/workspace
+    networks:
+      - joinflow-network
+    depends_on:
+      - redis
+      - joinflow
+    profiles:
+      - scheduler
+
+  # ===========================================
+  # Watchtower 自动更新（可选）
+  # ===========================================
+  watchtower:
+    image: containrrr/watchtower
+    container_name: joinflow-watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=86400
+      - WATCHTOWER_LABEL_ENABLE=true
+    networks:
+      - joinflow-network
+    profiles:
+      - autoupdate
+
+# ===========================================
+# 网络配置
+# ===========================================
+networks:
+  joinflow-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+# ===========================================
+# 数据卷
+# ===========================================
+volumes:
+  joinflow-data:
+    driver: local
+  joinflow-exports:
+    driver: local
+  joinflow-sessions:
+    driver: local
+  joinflow-kb:
+    driver: local
+  redis-data:
+    driver: local
+  nginx-logs:
+    driver: local
+

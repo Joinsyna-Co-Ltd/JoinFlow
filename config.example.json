@@ -1,0 +1,56 @@
+{
+  "models": [
+    {
+      "id": "gpt-4o-mini",
+      "name": "GPT-4o Mini",
+      "provider": "openai",
+      "enabled": true,
+      "is_default": true
+    },
+    {
+      "id": "gpt-4o",
+      "name": "GPT-4o",
+      "provider": "openai",
+      "enabled": false,
+      "is_default": false
+    },
+    {
+      "id": "claude-3-5-sonnet-20241022",
+      "name": "Claude 3.5 Sonnet",
+      "provider": "anthropic",
+      "enabled": false,
+      "is_default": false
+    },
+    {
+      "id": "deepseek-chat",
+      "name": "DeepSeek Chat",
+      "provider": "deepseek",
+      "api_base": "https://api.deepseek.com/v1",
+      "enabled": false,
+      "is_default": false
+    }
+  ],
+  "settings": {
+    "max_parallel_tasks": 3,
+    "auto_retry": true,
+    "timeout_seconds": 300
+  },
+  "qdrant": {
+    "url": "http://localhost:6333",
+    "knowledge_collection": "joinflow_knowledge",
+    "history_collection": "joinflow_history",
+    "tasks_collection": "joinflow_tasks",
+    "cache_collection": "joinflow_llm_cache",
+    "vector_dim": 384,
+    "cache_enabled": true,
+    "cache_similarity_threshold": 0.95,
+    "cache_ttl_hours": 168
+  },
+  "environment_variables": {
+    "OPENAI_API_KEY": "Set your OpenAI API key",
+    "QDRANT_URL": "http://localhost:6333 (local) or http://qdrant:6333 (docker)",
+    "LLM_MODEL": "gpt-4o-mini",
+    "LOG_LEVEL": "INFO"
+  }
+}
+

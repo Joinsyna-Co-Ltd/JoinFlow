@@ -1,0 +1,14 @@
+# JoinFlow GUI Agent 配置
+# OpenRouter API Key
+OPENROUTER_API_KEY=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
+
+# 推荐的模型配置
+# 文本模型（免费，稳定）
+TEXT_MODEL=openrouter/mistralai/mistral-7b-instruct:free
+
+# 视觉模型（免费，可能限流）
+VISION_MODEL=openrouter/google/gemini-2.0-flash-exp:free
+
+# 备选付费模型（更稳定，约 $0.001/次）
+# VISION_MODEL=openrouter/openai/gpt-4o-mini
+

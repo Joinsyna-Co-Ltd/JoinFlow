@@ -1,0 +1,58 @@
+# JoinFlow Prometheus 监控配置
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'joinflow-monitor'
+
+# 告警规则
+rule_files:
+  - 'alerts/*.yml'
+
+# 告警管理器
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+# 抓取配置
+scrape_configs:
+  # Prometheus 自身
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # JoinFlow 应用
+  - job_name: 'joinflow'
+    static_configs:
+      - targets: ['joinflow:8000']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Redis
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+
+  # Qdrant 向量数据库
+  - job_name: 'qdrant'
+    static_configs:
+      - targets: ['qdrant:6333']
+    metrics_path: '/metrics'
+
+  # Nginx (如果启用了 stub_status)
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx:80']
+
+  # Node Exporter (系统指标)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # Docker 容器指标
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+

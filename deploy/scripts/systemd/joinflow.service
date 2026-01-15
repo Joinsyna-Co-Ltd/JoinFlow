@@ -1,0 +1,55 @@
+# JoinFlow Systemd 服务单元文件
+# 安装位置: /etc/systemd/system/joinflow.service
+#
+# 安装命令:
+#   sudo cp joinflow.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable joinflow
+#   sudo systemctl start joinflow
+
+[Unit]
+Description=JoinFlow AI Agent 云服务
+Documentation=https://github.com/YOUR_REPO/joinflow
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=docker
+WorkingDirectory=/opt/joinflow/deploy
+EnvironmentFile=-/opt/joinflow/.env
+
+# 启动命令
+ExecStartPre=/usr/bin/docker-compose pull --quiet
+ExecStart=/usr/bin/docker-compose up --remove-orphans
+ExecStop=/usr/bin/docker-compose down
+ExecReload=/usr/bin/docker-compose restart
+
+# 重启策略
+Restart=always
+RestartSec=30
+StartLimitInterval=300
+StartLimitBurst=5
+
+# 超时设置
+TimeoutStartSec=180
+TimeoutStopSec=120
+
+# 日志
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=joinflow
+
+# 资源限制
+MemoryMax=4G
+CPUQuota=200%
+
+# 安全设置
+PrivateTmp=true
+NoNewPrivileges=false
+
+[Install]
+WantedBy=multi-user.target
+

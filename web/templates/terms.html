@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark" class="scrollable-page">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JoinFlow - 服务条款</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Base Styles -->
+  <link rel="stylesheet" href="/static/css/style.css?v=20260108b">
+  
+  <style>
+    /* Override for scrollable page */
+    html.scrollable-page,
+    html.scrollable-page body,
+    body.scrollable-page {
+      overflow: auto !important;
+      overflow-y: scroll !important;
+      height: auto !important;
+    }
+    
+    .legal-page {
+      min-height: 100vh;
+      background: var(--bg-primary);
+    }
+    
+    .legal-header {
+      padding: var(--spacing-lg) var(--spacing-xl);
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .legal-header .logo {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      text-decoration: none;
+    }
+    
+    .legal-header .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: white;
+    }
+    
+    .legal-header .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .legal-content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: var(--spacing-2xl) var(--spacing-xl);
+    }
+    
+    .legal-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: var(--spacing-md);
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .legal-meta {
+      color: var(--text-muted);
+      margin-bottom: var(--spacing-2xl);
+      padding-bottom: var(--spacing-lg);
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .legal-section {
+      margin-bottom: var(--spacing-2xl);
+    }
+    
+    .legal-section h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: var(--spacing-md);
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+    
+    .legal-section h2 i {
+      color: var(--accent-primary);
+      font-size: 1.2rem;
+    }
+    
+    .legal-section h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: var(--spacing-lg) 0 var(--spacing-sm);
+      color: var(--text-primary);
+    }
+    
+    .legal-section p {
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .legal-section ul {
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-left: var(--spacing-xl);
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .legal-section li {
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .highlight-box {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--accent-primary);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-lg);
+      margin: var(--spacing-lg) 0;
+    }
+    
+    .highlight-box.warning {
+      border-left-color: var(--accent-warning);
+    }
+    
+    .highlight-box.success {
+      border-left-color: var(--accent-success);
+    }
+    
+    .legal-footer {
+      padding: var(--spacing-xl);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+    }
+    
+    .legal-footer a {
+      color: var(--accent-primary);
+      text-decoration: none;
+    }
+    
+    .legal-footer a:hover {
+      text-decoration: underline;
+    }
+    
+    .legal-nav {
+      display: flex;
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-md);
+      justify-content: center;
+    }
+  </style>
+</head>
+<body class="scrollable-page">
+  <div class="legal-page">
+    <!-- Header -->
+    <header class="legal-header">
+      <a href="/" class="logo">
+        <div class="logo-icon">
+          <i class="fas fa-atom"></i>
+        </div>
+        <span class="logo-text">JoinFlow</span>
+      </a>
+      <div>
+        <a href="/" class="btn secondary">
+          <i class="fas fa-arrow-left"></i> 返回首页
+        </a>
+      </div>
+    </header>
+    
+    <!-- Content -->
+    <div class="legal-content">
+      <h1 class="legal-title">服务条款</h1>
+      <p class="legal-meta">
+        <i class="fas fa-calendar-alt"></i> 最后更新：2024年1月1日 &nbsp;|&nbsp;
+        <i class="fas fa-clock"></i> 生效日期：2024年1月1日
+      </p>
+      
+      <div class="highlight-box">
+        <p style="margin: 0;"><strong>重要提示：</strong>在使用 JoinFlow 服务之前，请仔细阅读以下服务条款。使用我们的服务即表示您同意受这些条款的约束。</p>
+      </div>
+      
+      <section class="legal-section">
+        <h2><i class="fas fa-file-contract"></i> 1. 服务协议</h2>
+        <p>欢迎使用 JoinFlow（以下简称"本服务"）。本服务条款（以下简称"本条款"）是您与 JoinFlow 团队之间关于使用本服务所订立的协议。</p>
+        <p>通过访问或使用本服务，您确认您已阅读、理解并同意受本条款的约束。如果您不同意本条款的任何部分，请勿使用本服务。</p>
+      </section>
+      
+      <section class="legal-section">
+        <h2><i class="fas fa-user-check"></i> 2. 账户注册与安全</h2>
+        <h3>2.1 账户创建</h3>
+        <p>使用本服务的某些功能可能需要您创建账户。在注册时，您必须提供准确、完整的信息，并及时更新以保持其准确性。</p>
+        
+        <h3>2.2 账户安全</h3>
+        <p>您有责任维护账户的安全性，包括：</p>
+        <ul>
+          <li>保护您的登录凭据的机密性</li>
+          <li>限制对您的账户和设备的访问</li>
+          <li>及时通知我们任何未经授权使用您账户的情况</li>
+        </ul>
+        
+        <h3>2.3 账户责任</h3>
+        <p>您对您账户下发生的所有活动负责，无论这些活动是否经过您的授权。</p>
+      </section>
+      
+      <section class="legal-section">
+        <h2><i class="fas fa-tasks"></i> 3. 服务使用规范</h2>
+        <h3>3.1 许可授予</h3>
+        <p>在您遵守本条款的前提下，我们授予您一项有限的、非独占的、不可转让的、可撤销的许可，允许您访问和使用本服务。</p>
+        
+        <h3>3.2 禁止行为</h3>
+        <p>您同意不会：</p>
+        <ul>
+          <li>违反任何适用的法律法规</li>
+          <li>侵犯他人的知识产权或其他权利</li>
+          <li>上传或传播恶意软件、病毒或其他有害代码</li>
+          <li>干扰或破坏本服务的正常运行</li>
+          <li>未经授权访问他人的账户或数据</li>
+          <li>使用自动化工具以违反我们政策的方式访问本服务</li>
+          <li>将本服务用于任何非法目的</li>
+        </ul>
+      </section>
+      
+      <section class="legal-section">
+        <h2><i class="fas fa-credit-card"></i> 4. 付费服务</h2>
+        <h3>4.1 订阅与计费</h3>
+        <p>本服务提供免费和付费订阅计划。付费计划的具体功能和价格详见我们的<a href="/pricing">定价页面</a>。</p>
+        
+        <h3>4.2 自动续订</h3>
+        <p>除非您在当前订阅期结束前取消，否则您的订阅将自动续订，届时将按照当时有效的费率收费。</p>
+        
+        <h3>4.3 退款政策</h3>
+        <p>除非法律另有规定，订阅费用一般不予退还。如果您对服务不满意，请联系我们的客户支持团队讨论可能的解决方案。</p>
+        
+        <div class="highlight-box success">
+          <p style="margin: 0;"><strong>提示：</strong>您可以随时在账户设置中取消订阅。取消后，您仍可以继续使用付费功能直到当前计费周期结束。</p>
+        </div>
+      </section>
+      
+      <section class="legal-section">
+        <h2><i class="fas fa-lightbulb"></i> 5. 知识产权</h2>
+        <h3>5.1 我们的权利</h3>
+        <p>本服务及其所有内容、功能和特性（包括但不限于所有信息、软件、文本、显示、图像、视频和音频，以及其设计、选择和安排）均归我们或我们的许可方所有，受版权、商标和其他知识产权法律保护。</p>
+        
+        <h3>5.2 您的内容</h3>
+        <p>您保留您通过本服务提交、发布或显示的任何内容的所有权利。通过使用本服务，您授予我们一项全球性的、非独占的、免版税的许可，允许我们使用、复制、修改和显示此类内容，以便提供和改进本服务。</p>
+      </section>
+      
+      <section class="legal-section">
+        <h2><i class="fas fa-shield-alt"></i> 6. 免责声明</h2>
+        <p>本服务按"现状"和"可用"基础提供，不提供任何明示或暗示的保证。我们不保证：</p>
+        <ul>
+          <li>本服务将不间断、及时、安全或无错误</li>
+          <li>通过本服务获得的结果将准确或可靠</li>
+          <li>本服务将满足您的所有需求</li>
+        </ul>
+        
+        <div class="highlight-box warning">
+          <p style="margin: 0;"><strong>注意：</strong>AI 生成的内容可能包含错误或不准确之处。请始终验证重要信息，不要将 AI 输出作为专业建议的唯一来源。</p>
+        </div>
+      </section>
+      
+      <section class="legal-section">
+        <h2><i class="fas fa-balance-scale"></i> 7. 责任限制</h2>
+        <p>在法律允许的最大范围内，我们对以下情况不承担责任：</p>
+        <ul>
+          <li>任何间接、附带、特殊、后果性或惩罚性损害</li>
+          <li>任何利润、数据、使用、商誉或其他无形损失的损失</li>
+          <li>您无法访问或使用本服务</li>
+          <li>第三方在本服务上的任何行为或内容</li>
+        </ul>
+      </section>
+      
+      <section class="legal-section">
+        <h2><i class="fas fa-edit"></i> 8. 条款修改</h2>
+        <p>我们保留随时修改本条款的权利。如有重大变更，我们将通过在本服务上发布通知或向您发送电子邮件等方式通知您。</p>
+        <p>您在变更后继续使用本服务即表示您接受修改后的条款。</p>
+      </section>
+      
+      <section class="legal-section">
+        <h2><i class="fas fa-gavel"></i> 9. 法律适用与争议解决</h2>
+        <p>本条款受中华人民共和国法律管辖并按其解释。因本条款引起的或与之相关的任何争议，双方应首先尝试通过友好协商解决。如果协商不成，任何一方均可将争议提交至有管辖权的人民法院解决。</p>
+      </section>
+      
+      <section class="legal-section">
+        <h2><i class="fas fa-envelope"></i> 10. 联系我们</h2>
+        <p>如果您对本服务条款有任何疑问或建议，请通过以下方式联系我们：</p>
+        <ul>
+          <li>电子邮件：support@joinflow.ai</li>
+          <li>在线客服：访问我们的<a href="/pricing">定价页面</a>并点击"联系我们"</li>
+        </ul>
+      </section>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="legal-footer">
+      <p>© 2024 JoinFlow. 保留所有权利。</p>
+      <div class="legal-nav">
+        <a href="/terms">服务条款</a> |
+        <a href="/privacy">隐私政策</a> |
+        <a href="/pricing">定价方案</a> |
+        <a href="/">返回首页</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
+

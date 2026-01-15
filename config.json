@@ -1,0 +1,452 @@
+{
+  "models": [
+    {
+      "id": "openrouter/mistralai/mistral-7b-instruct:free",
+      "name": "Mistral 7B (免费)",
+      "provider": "openrouter",
+      "api_base": "https://openrouter.ai/api/v1",
+      "api_key": "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",
+      "enabled": true,
+      "is_default": true,
+      "description": "OpenRouter免费模型，适合日常任务"
+    },
+    {
+      "id": "openrouter/google/gemini-2.0-flash-exp:free",
+      "name": "Gemini 2.0 Flash (免费)",
+      "provider": "openrouter",
+      "api_base": "https://openrouter.ai/api/v1",
+      "api_key": "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",
+      "enabled": true,
+      "is_default": false,
+      "description": "OpenRouter免费视觉模型"
+    },
+    {
+      "id": "openrouter/meta-llama/llama-3.2-90b-vision-instruct",
+      "name": "Llama 3.2 90B Vision",
+      "provider": "openrouter",
+      "api_base": "https://openrouter.ai/api/v1",
+      "api_key": "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",
+      "enabled": true,
+      "is_default": false,
+      "description": "Meta最强视觉模型"
+    },
+    {
+      "id": "gpt-4o",
+      "name": "GPT-4o",
+      "provider": "openai",
+      "api_base": "https://api.openai.com/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "OpenAI最强多模态模型，支持图像理解"
+    },
+    {
+      "id": "gpt-4o-mini",
+      "name": "GPT-4o Mini",
+      "provider": "openai",
+      "api_base": "https://api.openai.com/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "性价比最高的GPT模型"
+    },
+    {
+      "id": "o1-preview",
+      "name": "o1 Preview",
+      "provider": "openai",
+      "api_base": "https://api.openai.com/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "OpenAI推理模型，擅长复杂思考"
+    },
+    {
+      "id": "claude-3-5-sonnet-20241022",
+      "name": "Claude 3.5 Sonnet",
+      "provider": "anthropic",
+      "api_base": "https://api.anthropic.com/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "Anthropic最强模型，代码能力出色"
+    },
+    {
+      "id": "claude-3-5-haiku-20241022",
+      "name": "Claude 3.5 Haiku",
+      "provider": "anthropic",
+      "api_base": "https://api.anthropic.com/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "Anthropic快速模型，性价比高"
+    },
+    {
+      "id": "gemini-2.0-flash-exp",
+      "name": "Gemini 2.0 Flash",
+      "provider": "google",
+      "api_base": "https://generativelanguage.googleapis.com/v1beta",
+      "enabled": false,
+      "is_default": false,
+      "description": "Google最新模型，100万上下文"
+    },
+    {
+      "id": "gemini-1.5-pro",
+      "name": "Gemini 1.5 Pro",
+      "provider": "google",
+      "api_base": "https://generativelanguage.googleapis.com/v1beta",
+      "enabled": false,
+      "is_default": false,
+      "description": "Google强大模型，200万上下文"
+    },
+    {
+      "id": "deepseek-chat",
+      "name": "DeepSeek Chat",
+      "provider": "deepseek",
+      "api_base": "https://api.deepseek.com/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "国产高性价比模型，推理能力强"
+    },
+    {
+      "id": "deepseek-reasoner",
+      "name": "DeepSeek R1",
+      "provider": "deepseek",
+      "api_base": "https://api.deepseek.com/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "DeepSeek推理模型，思维链强"
+    },
+    {
+      "id": "mistral-large-latest",
+      "name": "Mistral Large",
+      "provider": "mistral",
+      "api_base": "https://api.mistral.ai/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "欧洲领先开源模型"
+    },
+    {
+      "id": "qwen-max",
+      "name": "通义千问 Max",
+      "provider": "qwen",
+      "api_base": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "阿里云最强模型"
+    },
+    {
+      "id": "qwen-plus",
+      "name": "通义千问 Plus",
+      "provider": "qwen",
+      "api_base": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "阿里云均衡模型，13万上下文"
+    },
+    {
+      "id": "glm-4-plus",
+      "name": "智谱 GLM-4 Plus",
+      "provider": "zhipu",
+      "api_base": "https://open.bigmodel.cn/api/paas/v4",
+      "enabled": false,
+      "is_default": false,
+      "description": "智谱AI最强模型"
+    },
+    {
+      "id": "glm-4-flash",
+      "name": "智谱 GLM-4 Flash",
+      "provider": "zhipu",
+      "api_base": "https://open.bigmodel.cn/api/paas/v4",
+      "enabled": false,
+      "is_default": false,
+      "description": "智谱AI免费模型"
+    },
+    {
+      "id": "moonshot-v1-128k",
+      "name": "Moonshot 128K",
+      "provider": "moonshot",
+      "api_base": "https://api.moonshot.cn/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "月之暗面Kimi，12.8万上下文"
+    },
+    {
+      "id": "yi-large",
+      "name": "零一万物 Yi Large",
+      "provider": "yi",
+      "api_base": "https://api.lingyiwanwu.com/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "李开复创办，Yi系列最强"
+    },
+    {
+      "id": "ernie-4.0-turbo-8k",
+      "name": "文心一言 4.0 Turbo",
+      "provider": "baidu",
+      "api_base": "https://aip.baidubce.com/rpc/2.0/ai_custom/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "百度最新ERNIE模型"
+    },
+    {
+      "id": "doubao-pro-128k",
+      "name": "豆包 Pro 128K",
+      "provider": "doubao",
+      "api_base": "https://ark.cn-beijing.volces.com/api/v3",
+      "enabled": false,
+      "is_default": false,
+      "description": "字节跳动豆包模型"
+    },
+    {
+      "id": "abab6.5s-chat",
+      "name": "MiniMax ABAB 6.5s",
+      "provider": "minimax",
+      "api_base": "https://api.minimax.chat/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "MiniMax长上下文模型"
+    },
+    {
+      "id": "4.0Ultra",
+      "name": "讯飞星火 4.0 Ultra",
+      "provider": "spark",
+      "api_base": "https://spark-api-open.xf-yun.com/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "讯飞最强星火模型"
+    },
+    {
+      "id": "Baichuan4",
+      "name": "百川 4",
+      "provider": "baichuan",
+      "api_base": "https://api.baichuan-ai.com/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "百川智能最新模型"
+    },
+    {
+      "id": "step-2-16k",
+      "name": "阶跃星辰 Step 2",
+      "provider": "stepfun",
+      "api_base": "https://api.stepfun.com/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "阶跃星辰万亿参数模型"
+    },
+    {
+      "id": "SenseChat-5",
+      "name": "商汤日日新 5",
+      "provider": "sensenova",
+      "api_base": "https://api.sensenova.cn/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "商汤科技最新模型"
+    },
+    {
+      "id": "llama-3.3-70b-versatile",
+      "name": "Llama 3.3 70B (Groq)",
+      "provider": "groq",
+      "api_base": "https://api.groq.com/openai/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "Groq超快速推理"
+    },
+    {
+      "id": "command-r-plus",
+      "name": "Command R+ (Cohere)",
+      "provider": "cohere",
+      "api_base": "https://api.cohere.ai/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "Cohere企业级模型"
+    },
+    {
+      "id": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+      "name": "Llama 3.3 70B (Together)",
+      "provider": "together",
+      "api_base": "https://api.together.xyz/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "Together AI托管模型"
+    },
+    {
+      "id": "llama-3.1-sonar-large-128k-online",
+      "name": "Sonar Large Online (Perplexity)",
+      "provider": "perplexity",
+      "api_base": "https://api.perplexity.ai",
+      "enabled": false,
+      "is_default": false,
+      "description": "Perplexity实时联网搜索"
+    },
+    {
+      "id": "accounts/fireworks/models/llama-v3p3-70b-instruct",
+      "name": "Llama 3.3 70B (Fireworks)",
+      "provider": "fireworks",
+      "api_base": "https://api.fireworks.ai/inference/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "Fireworks高性能推理"
+    },
+    {
+      "id": "llama3.3:latest",
+      "name": "Llama 3.3 (Ollama本地)",
+      "provider": "ollama",
+      "api_base": "http://localhost:11434/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "Ollama本地运行，免费"
+    },
+    {
+      "id": "qwen2.5:latest",
+      "name": "Qwen 2.5 (Ollama本地)",
+      "provider": "ollama",
+      "api_base": "http://localhost:11434/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "Ollama本地运行Qwen"
+    },
+    {
+      "id": "deepseek-r1:latest",
+      "name": "DeepSeek R1 (Ollama本地)",
+      "provider": "ollama",
+      "api_base": "http://localhost:11434/v1",
+      "enabled": false,
+      "is_default": false,
+      "description": "Ollama本地运行DeepSeek R1"
+    }
+  ],
+  "providers": {
+    "openai": {
+      "name": "OpenAI",
+      "api_key_env": "OPENAI_API_KEY",
+      "description": "OpenAI GPT系列"
+    },
+    "anthropic": {
+      "name": "Anthropic",
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "description": "Claude系列"
+    },
+    "google": {
+      "name": "Google AI",
+      "api_key_env": "GOOGLE_API_KEY",
+      "description": "Gemini系列"
+    },
+    "deepseek": {
+      "name": "DeepSeek",
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "description": "深度求索"
+    },
+    "mistral": {
+      "name": "Mistral AI",
+      "api_key_env": "MISTRAL_API_KEY",
+      "description": "欧洲开源模型"
+    },
+    "qwen": {
+      "name": "通义千问",
+      "api_key_env": "DASHSCOPE_API_KEY",
+      "description": "阿里云"
+    },
+    "zhipu": {
+      "name": "智谱AI",
+      "api_key_env": "ZHIPU_API_KEY",
+      "description": "GLM系列"
+    },
+    "moonshot": {
+      "name": "月之暗面",
+      "api_key_env": "MOONSHOT_API_KEY",
+      "description": "Kimi"
+    },
+    "yi": {
+      "name": "零一万物",
+      "api_key_env": "YI_API_KEY",
+      "description": "Yi系列"
+    },
+    "baidu": {
+      "name": "文心一言",
+      "api_key_env": "BAIDU_API_KEY",
+      "description": "百度ERNIE"
+    },
+    "doubao": {
+      "name": "豆包",
+      "api_key_env": "DOUBAO_API_KEY",
+      "description": "字节跳动"
+    },
+    "minimax": {
+      "name": "MiniMax",
+      "api_key_env": "MINIMAX_API_KEY",
+      "description": "ABAB系列"
+    },
+    "spark": {
+      "name": "讯飞星火",
+      "api_key_env": "SPARK_API_KEY",
+      "description": "科大讯飞"
+    },
+    "baichuan": {
+      "name": "百川智能",
+      "api_key_env": "BAICHUAN_API_KEY",
+      "description": "百川系列"
+    },
+    "stepfun": {
+      "name": "阶跃星辰",
+      "api_key_env": "STEPFUN_API_KEY",
+      "description": "Step系列"
+    },
+    "sensenova": {
+      "name": "商汤日日新",
+      "api_key_env": "SENSENOVA_API_KEY",
+      "description": "SenseChat"
+    },
+    "groq": {
+      "name": "Groq",
+      "api_key_env": "GROQ_API_KEY",
+      "description": "超快速推理"
+    },
+    "cohere": {
+      "name": "Cohere",
+      "api_key_env": "COHERE_API_KEY",
+      "description": "企业NLP"
+    },
+    "together": {
+      "name": "Together AI",
+      "api_key_env": "TOGETHER_API_KEY",
+      "description": "开源模型云"
+    },
+    "perplexity": {
+      "name": "Perplexity",
+      "api_key_env": "PERPLEXITY_API_KEY",
+      "description": "联网搜索AI"
+    },
+    "fireworks": {
+      "name": "Fireworks AI",
+      "api_key_env": "FIREWORKS_API_KEY",
+      "description": "高性能推理"
+    },
+    "azure": {
+      "name": "Azure OpenAI",
+      "api_key_env": "AZURE_OPENAI_API_KEY",
+      "description": "微软企业版"
+    },
+    "bedrock": {
+      "name": "AWS Bedrock",
+      "api_key_env": "AWS_ACCESS_KEY_ID",
+      "description": "亚马逊云"
+    },
+    "ollama": {
+      "name": "Ollama",
+      "api_key_env": "",
+      "description": "本地运行"
+    },
+    "lmstudio": {
+      "name": "LM Studio",
+      "api_key_env": "",
+      "description": "本地GUI"
+    },
+    "vllm": {
+      "name": "vLLM",
+      "api_key_env": "",
+      "description": "本地服务器"
+    }
+  },
+  "settings": {
+    "max_parallel_tasks": 3,
+    "auto_retry": true,
+    "default_timeout": 60,
+    "streaming_enabled": true,
+    "save_conversation_history": true
+  }
+}

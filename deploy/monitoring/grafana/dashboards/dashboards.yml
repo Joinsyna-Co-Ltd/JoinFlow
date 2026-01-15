@@ -1,0 +1,14 @@
+# Grafana 仪表板配置
+apiVersion: 1
+
+providers:
+  - name: 'JoinFlow Dashboards'
+    orgId: 1
+    folder: 'JoinFlow'
+    folderUid: 'joinflow'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
+

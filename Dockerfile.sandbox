@@ -1,0 +1,40 @@
+# JoinFlow 代码执行沙盒
+FROM python:3.11-slim
+
+# 安装基础依赖
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# 创建非root用户
+RUN groupadd -r sandbox && useradd -r -g sandbox -d /workspace -s /bin/bash sandbox
+
+# 安装常用Python包
+RUN pip install --no-cache-dir \
+    numpy \
+    pandas \
+    matplotlib \
+    requests \
+    beautifulsoup4 \
+    lxml \
+    pillow \
+    pyyaml \
+    python-dateutil \
+    tabulate
+
+# 设置工作目录
+WORKDIR /workspace
+
+# 设置权限
+RUN chown -R sandbox:sandbox /workspace
+
+# 切换到非root用户
+USER sandbox
+
+# 设置环境变量
+ENV HOME=/workspace
+ENV PYTHONPATH=/workspace
+
+# 默认命令
+CMD ["python3"]
+

@@ -1,0 +1,54 @@
+{
+  "models": [
+    {
+      "id": "gpt-4o-mini",
+      "name": "GPT-4o Mini",
+      "provider": "openai",
+      "api_base": "https://api.openai.com/v1",
+      "api_key_env": "OPENAI_API_KEY",
+      "enabled": true,
+      "is_default": true
+    },
+    {
+      "id": "gpt-4o",
+      "name": "GPT-4o",
+      "provider": "openai",
+      "api_base": "https://api.openai.com/v1",
+      "api_key_env": "OPENAI_API_KEY",
+      "enabled": true,
+      "is_default": false
+    },
+    {
+      "id": "gpt-4-turbo",
+      "name": "GPT-4 Turbo",
+      "provider": "openai",
+      "api_base": "https://api.openai.com/v1",
+      "api_key_env": "OPENAI_API_KEY",
+      "enabled": true,
+      "is_default": false
+    },
+    {
+      "id": "claude-3-5-sonnet",
+      "name": "Claude 3.5 Sonnet",
+      "provider": "anthropic",
+      "api_base": "https://api.anthropic.com/v1",
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "enabled": false,
+      "is_default": false
+    },
+    {
+      "id": "deepseek-chat",
+      "name": "DeepSeek Chat",
+      "provider": "deepseek",
+      "api_base": "https://api.deepseek.com/v1",
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "enabled": false,
+      "is_default": false
+    }
+  ],
+  "settings": {
+    "max_parallel_tasks": 3,
+    "auto_retry": true,
+    "timeout": 60
+  }
+}

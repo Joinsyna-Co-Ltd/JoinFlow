@@ -1,0 +1,108 @@
+{
+  "version": "1.0",
+  "updated_at": "2026-01-09T14:42:26.011484",
+  "experiences": [
+    {
+      "id": "exp_20260109_144226_0",
+      "task": "打开记事本",
+      "task_hash": "0d8c0db4e611",
+      "success": true,
+      "actions": [
+        {
+          "action_type": "click",
+          "target": "开始菜单",
+          "text": null,
+          "coordinates": null,
+          "success": true
+        },
+        {
+          "action_type": "type",
+          "target": null,
+          "text": "notepad",
+          "coordinates": null,
+          "success": true
+        }
+      ],
+      "steps_count": 2,
+      "duration_ms": 1000,
+      "error": null,
+      "app_context": null,
+      "tags": [],
+      "created_at": "2026-01-09T14:42:26.009749",
+      "used_count": 1
+    },
+    {
+      "id": "exp_20260109_144226_1",
+      "task": "打开浏览器",
+      "task_hash": "5e5d4d99324d",
+      "success": true,
+      "actions": [
+        {
+          "action_type": "click",
+          "target": "Chrome图标",
+          "text": null,
+          "coordinates": null,
+          "success": true
+        }
+      ],
+      "steps_count": 1,
+      "duration_ms": 1000,
+      "error": null,
+      "app_context": null,
+      "tags": [],
+      "created_at": "2026-01-09T14:42:26.010201",
+      "used_count": 0
+    },
+    {
+      "id": "exp_20260109_144226_2",
+      "task": "打开计算器",
+      "task_hash": "94d7c5a8bb51",
+      "success": true,
+      "actions": [
+        {
+          "action_type": "hotkey",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": true
+        },
+        {
+          "action_type": "type",
+          "target": null,
+          "text": "calc",
+          "coordinates": null,
+          "success": true
+        }
+      ],
+      "steps_count": 2,
+      "duration_ms": 1000,
+      "error": null,
+      "app_context": null,
+      "tags": [],
+      "created_at": "2026-01-09T14:42:26.010619",
+      "used_count": 0
+    },
+    {
+      "id": "exp_20260109_144226_3",
+      "task": "打开记事本",
+      "task_hash": "0d8c0db4e611",
+      "success": false,
+      "actions": [
+        {
+          "action_type": "click",
+          "target": "错误位置",
+          "text": null,
+          "coordinates": null,
+          "success": true
+        }
+      ],
+      "steps_count": 1,
+      "duration_ms": 1000,
+      "error": null,
+      "app_context": null,
+      "tags": [],
+      "created_at": "2026-01-09T14:42:26.011023",
+      "used_count": 0
+    }
+  ]
+}

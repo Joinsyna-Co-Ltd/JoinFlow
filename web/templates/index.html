@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark" data-lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JoinFlow - AI Agent Orchestrator</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/static/css/style.css">
+  
+  <!-- Highlight.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.1/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Left Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">
+            <i class="fas fa-atom"></i>
+          </div>
+          <span class="logo-text">JoinFlow</span>
+        </div>
+      </div>
+      
+      <button class="new-task-btn" onclick="showNewTaskModal()">
+        <i class="fas fa-plus"></i>
+        <span data-i18n="newTask">新建任务</span>
+      </button>
+      
+      <!-- Task Lists Container -->
+      <div class="task-lists-container">
+        <!-- Active Tasks -->
+        <div class="task-section active-section">
+          <div class="section-header" onclick="toggleSection('active')">
+            <div class="section-header-left">
+              <i class="fas fa-play-circle"></i>
+              <span data-i18n="inProgress">进行中</span>
+            </div>
+            <div class="section-header-right">
+              <span class="badge" id="activeTaskCount">0</span>
+              <i class="fas fa-chevron-down section-toggle" id="activeToggle"></i>
+            </div>
+          </div>
+          <div class="task-list" id="activeTaskList">
+            <div class="empty-state" id="activeEmptyState">
+              <i class="fas fa-inbox"></i>
+              <span data-i18n="noActiveTasks">暂无进行中的任务</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Completed Tasks -->
+        <div class="task-section completed-section">
+          <div class="section-header" onclick="toggleSection('completed')">
+            <div class="section-header-left">
+              <i class="fas fa-check-circle"></i>
+              <span data-i18n="completed">已完成</span>
+            </div>
+            <div class="section-header-right">
+              <span class="badge success" id="completedTaskCount">0</span>
+              <i class="fas fa-chevron-down section-toggle" id="completedToggle"></i>
+            </div>
+          </div>
+          <div class="task-list collapsed" id="completedTaskList">
+            <div class="empty-state" id="completedEmptyState">
+              <i class="fas fa-trophy"></i>
+              <span data-i18n="noCompletedTasks">暂无已完成的任务</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Feature Navigation -->
+      <div class="feature-nav">
+        <button class="feature-btn workspace-btn" onclick="openWorkspace()" title="Agent 可视化工作台">
+          <i class="fas fa-rocket"></i>
+          <span data-i18n="workspace">工作台</span>
+        </button>
+        <button class="feature-btn" onclick="showTaskTemplates()" title="任务模板">
+          <i class="fas fa-layer-group"></i>
+          <span data-i18n="templates">模板</span>
+        </button>
+        <button class="feature-btn" onclick="showKnowledgeBase()" title="知识库">
+          <i class="fas fa-book"></i>
+          <span data-i18n="knowledgeBase">知识库</span>
+        </button>
+        <button class="feature-btn" onclick="showWorkflows()" title="工作流">
+          <i class="fas fa-project-diagram"></i>
+          <span data-i18n="workflows">工作流</span>
+        </button>
+        <button class="feature-btn" onclick="showStatistics()" title="统计">
+          <i class="fas fa-chart-line"></i>
+          <span data-i18n="statistics">统计</span>
+        </button>
+        <button class="feature-btn" onclick="showSchedules()" title="定时任务">
+          <i class="fas fa-clock"></i>
+          <span data-i18n="schedules">定时</span>
+        </button>
+      </div>
+      
+      <div class="sidebar-footer">
+        <a href="/pricing" class="upgrade-btn" style="text-decoration: none;">
+          <i class="fas fa-crown"></i>
+          <span data-i18n="upgrade">升级订阅</span>
+        </a>
+        <div class="footer-btn-row">
+          <a href="/os-control" class="footer-btn-small" style="text-decoration: none;" title="本地OS控制">
+            <i class="fas fa-terminal"></i>
+            <span>OS控制</span>
+          </a>
+          <a href="/cloud" class="footer-btn-small" style="text-decoration: none;">
+            <i class="fas fa-cloud"></i>
+            <span data-i18n="cloudServices">云服务</span>
+          </a>
+          <button class="footer-btn-small" onclick="showSettings()">
+            <i class="fas fa-cog"></i>
+            <span data-i18n="settings">设置</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="main-header">
+        <div class="header-left">
+          <button class="icon-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 class="page-title" id="pageTitle" data-i18n="taskCenter">任务中心</h1>
+        </div>
+        <div class="header-right">
+          <!-- Subscription Status -->
+          <a href="/pricing" class="header-upgrade-btn" id="headerUpgradeBtn">
+            <i class="fas fa-crown"></i>
+            <span data-i18n="upgradePro">升级 Pro</span>
+          </a>
+          <!-- Language Toggle -->
+          <div class="lang-toggle" onclick="toggleLanguage()">
+            <span id="langLabel">中</span>
+          </div>
+          <button class="icon-btn" onclick="toggleTheme()" title="切换主题">
+            <i class="fas fa-moon" id="themeIcon"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content-area" id="contentArea">
+        <!-- Welcome View -->
+        <div class="welcome-view" id="welcomeView">
+          <div class="welcome-hero">
+            <div class="hero-icon">
+              <div class="orbit orbit-1"></div>
+              <div class="orbit orbit-2"></div>
+              <div class="orbit orbit-3"></div>
+              <div class="core-icon">
+                <i class="fas fa-robot"></i>
+              </div>
+            </div>
+            <h1 class="hero-title">JoinFlow Agent System</h1>
+            <p class="hero-subtitle" data-i18n="heroSubtitle">智能多Agent协作系统 - 自动规划、分解、执行复杂任务</p>
+          </div>
+          
+          <div class="quick-start">
+            <h3 class="quick-start-title" data-i18n="quickStart">快速开始</h3>
+            <div class="template-grid">
+              <div class="template-card" onclick="createTaskFromTemplate('research')">
+                <div class="template-icon research">
+                  <i class="fas fa-search"></i>
+                </div>
+                <div class="template-content">
+                  <div class="template-name" data-i18n="templateResearch">信息检索</div>
+                  <div class="template-desc" data-i18n="templateResearchDesc">搜索、整理、总结网络信息</div>
+                </div>
+                <div class="template-arrow"><i class="fas fa-arrow-right"></i></div>
+              </div>
+              
+              <div class="template-card" onclick="createTaskFromTemplate('code')">
+                <div class="template-icon code">
+                  <i class="fas fa-code"></i>
+                </div>
+                <div class="template-content">
+                  <div class="template-name" data-i18n="templateCode">代码生成</div>
+                  <div class="template-desc" data-i18n="templateCodeDesc">编写、调试、优化代码</div>
+                </div>
+                <div class="template-arrow"><i class="fas fa-arrow-right"></i></div>
+              </div>
+              
+              <div class="template-card" onclick="createTaskFromTemplate('data')">
+                <div class="template-icon data">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="template-content">
+                  <div class="template-name" data-i18n="templateData">数据分析</div>
+                  <div class="template-desc" data-i18n="templateDataDesc">处理、分析、可视化数据</div>
+                </div>
+                <div class="template-arrow"><i class="fas fa-arrow-right"></i></div>
+              </div>
+              
+              <div class="template-card" onclick="createTaskFromTemplate('file')">
+                <div class="template-icon file">
+                  <i class="fas fa-folder-open"></i>
+                </div>
+                <div class="template-content">
+                  <div class="template-name" data-i18n="templateFile">文件处理</div>
+                  <div class="template-desc" data-i18n="templateFileDesc">读取、转换、管理文件</div>
+                </div>
+                <div class="template-arrow"><i class="fas fa-arrow-right"></i></div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Stats -->
+          <div class="stats-bar">
+            <div class="stat-item">
+              <div class="stat-value" id="statTotalTasks">0</div>
+              <div class="stat-label" data-i18n="totalTasks">总任务数</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="statCompletedTasks">0</div>
+              <div class="stat-label" data-i18n="completedTasks">已完成</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="statTotalSteps">0</div>
+              <div class="stat-label" data-i18n="executionSteps">执行步骤</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="statAgentsUsed">6</div>
+              <div class="stat-label" data-i18n="availableAgents">可用Agent</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Task Detail View -->
+        <div class="task-view hidden" id="taskView">
+          <!-- Task Header -->
+          <div class="task-header">
+            <div class="task-info">
+              <div class="task-status-badge" id="taskStatusBadge">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span data-i18n="executing">执行中</span>
+              </div>
+              <h2 class="task-title" id="taskTitle">任务标题</h2>
+              <div class="task-meta">
+                <span><i class="fas fa-clock"></i> <span id="taskCreatedAt">--</span></span>
+                <span><i class="fas fa-hourglass-half"></i> <span id="taskDuration">--</span></span>
+              </div>
+            </div>
+            <div class="task-actions">
+              <button class="action-btn" id="pauseBtn" title="暂停" type="button">
+                <i class="fas fa-pause"></i>
+              </button>
+              <button class="action-btn warning" id="cancelBtn" title="取消" type="button">
+                <i class="fas fa-stop"></i>
+              </button>
+              <button class="action-btn danger" id="deleteBtn" title="删除" type="button">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Progress Overview -->
+          <div class="progress-overview">
+            <div class="progress-header">
+              <span data-i18n="overallProgress">总体进度</span>
+              <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
+            </div>
+            <div class="progress-stats">
+              <span><i class="fas fa-check"></i> <span id="completedSteps">0</span> <span data-i18n="stepsCompleted">已完成</span></span>
+              <span><i class="fas fa-spinner"></i> <span id="runningSteps">0</span> <span data-i18n="stepsRunning">执行中</span></span>
+              <span><i class="fas fa-clock"></i> <span id="pendingSteps">0</span> <span data-i18n="stepsPending">待执行</span></span>
+            </div>
+          </div>
+          
+          <!-- Workflow Visualization -->
+          <div class="workflow-section">
+            <h3 class="section-title">
+              <i class="fas fa-project-diagram"></i>
+              <span data-i18n="executionFlow">执行流程</span>
+            </h3>
+            <div class="workflow-container" id="workflowContainer">
+              <!-- Workflow steps will be rendered here -->
+            </div>
+          </div>
+          
+          <!-- Live Output -->
+          <div class="output-section">
+            <div class="output-header">
+              <h3 class="section-title">
+                <i class="fas fa-terminal"></i>
+                <span data-i18n="liveOutput">实时输出</span>
+              </h3>
+              <div class="output-actions">
+                <button class="small-btn" onclick="clearOutput()" data-i18n-title="clear">
+                  <i class="fas fa-trash"></i>
+                </button>
+                <button class="small-btn" onclick="copyOutput()" data-i18n-title="copy">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </div>
+            </div>
+            <div class="output-console" id="outputConsole">
+              <div class="output-line system">
+                <span class="timestamp" data-i18n="system">[系统]</span>
+                <span class="content" data-i18n="waitingStart">等待任务开始...</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Final Result -->
+          <div class="result-section hidden" id="resultSection">
+            <h3 class="section-title">
+              <i class="fas fa-flag-checkered"></i>
+              <span data-i18n="finalResult">最终结果</span>
+            </h3>
+            <div class="result-content" id="resultContent">
+              <!-- Result will be rendered here -->
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quick Input Bar -->
+      <div class="quick-input-bar">
+        <div class="input-wrapper">
+          <div class="input-prefix">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <input 
+            type="text" 
+            id="quickInput" 
+            data-i18n-placeholder="inputPlaceholder"
+            placeholder="输入任务描述，按 Enter 开始执行..."
+            onkeydown="handleQuickInput(event)"
+          >
+          <button class="input-submit" onclick="submitQuickInput()">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right Panel Toggle Button (visible when panel is collapsed) -->
+    <button class="right-panel-toggle" id="rightPanelToggle" type="button">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    
+    <!-- Right Panel - Agent Details -->
+    <aside class="right-panel" id="rightPanel">
+      <div class="panel-header">
+        <h3><i class="fas fa-tasks"></i> <span data-i18n="taskProgress">任务进度</span></h3>
+        <button class="icon-btn small" id="panelCollapseBtn" type="button">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+      
+      <div class="panel-content">
+        <!-- Current Step Detail -->
+        <div class="current-step-card" id="currentStepCard">
+          <div class="step-card-header">
+            <span class="step-label" data-i18n="currentStep">当前步骤</span>
+            <span class="step-number" id="currentStepNumber">-</span>
+          </div>
+          <div class="step-card-body">
+            <div class="step-agent" id="currentStepAgent">
+              <div class="agent-icon">
+                <i class="fas fa-robot"></i>
+              </div>
+              <div class="agent-info">
+                <div class="agent-name" data-i18n="waiting">等待中</div>
+                <div class="agent-type">-</div>
+              </div>
+            </div>
+            <div class="step-description" id="currentStepDesc" data-i18n="selectTaskToView">
+              选择一个任务以查看详情
+            </div>
+            <div class="step-timer" id="currentStepTimer">
+              <i class="fas fa-stopwatch"></i>
+              <span>--:--</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Task Steps Summary -->
+        <div class="steps-summary" id="stepsSummary">
+          <div class="summary-title" data-i18n="taskSteps">任务步骤</div>
+          <div class="steps-mini-list" id="stepsMiniList">
+            <div class="empty-steps" data-i18n="noStepsYet">暂无步骤</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- New Task Modal -->
+  <div class="modal-overlay" id="newTaskModal">
+    <div class="modal large">
+      <div class="modal-header">
+        <h2><i class="fas fa-plus-circle"></i> <span data-i18n="createNewTask">创建新任务</span></h2>
+        <button class="modal-close" onclick="closeModal('newTaskModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label data-i18n="taskDescription">任务描述</label>
+          <textarea 
+            id="newTaskDescription" 
+            data-i18n-placeholder="taskDescPlaceholder"
+            placeholder="详细描述你想要完成的任务...&#10;&#10;例如：搜索最新的AI技术趋势，整理成报告"
+            rows="4"
+          ></textarea>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label data-i18n="priority">优先级</label>
+            <select id="newTaskPriority">
+              <option value="1" data-i18n="priorityUrgent">🔴 紧急</option>
+              <option value="2" selected data-i18n="priorityNormal">🟡 普通</option>
+              <option value="3" data-i18n="priorityLow">🟢 低优先级</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label data-i18n="executionMode">执行模式</label>
+            <select id="newTaskMode">
+              <option value="auto" selected data-i18n="modeAuto">🤖 自动规划</option>
+              <option value="step" data-i18n="modeStep">👣 逐步确认</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label data-i18n="specifyAgents">指定Agent (可选)</label>
+          <div class="agent-selector">
+            <label class="agent-checkbox">
+              <input type="checkbox" value="browser">
+              <span class="checkmark browser"><i class="fas fa-globe"></i></span>
+              <span data-i18n="browserAgent">浏览器</span>
+            </label>
+            <label class="agent-checkbox">
+              <input type="checkbox" value="llm">
+              <span class="checkmark llm"><i class="fas fa-brain"></i></span>
+              <span data-i18n="llmAgent">大模型</span>
+            </label>
+            <label class="agent-checkbox">
+              <input type="checkbox" value="os">
+              <span class="checkmark os"><i class="fas fa-terminal"></i></span>
+              <span data-i18n="osAgent">系统</span>
+            </label>
+            <label class="agent-checkbox">
+              <input type="checkbox" value="code">
+              <span class="checkmark code"><i class="fas fa-code"></i></span>
+              <span data-i18n="codeAgent">代码</span>
+            </label>
+            <label class="agent-checkbox">
+              <input type="checkbox" value="data">
+              <span class="checkmark data"><i class="fas fa-chart-bar"></i></span>
+              <span data-i18n="dataAgent">数据</span>
+            </label>
+            <label class="agent-checkbox">
+              <input type="checkbox" value="vision">
+              <span class="checkmark vision"><i class="fas fa-eye"></i></span>
+              <span data-i18n="visionAgent">视觉</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label data-i18n="attachments">附件 (可选)</label>
+          <div class="file-upload-area" id="fileUploadArea">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p><span data-i18n="dragFiles">拖拽文件到此处，或</span> <span class="link" data-i18n="clickUpload">点击上传</span></p>
+            <input type="file" id="taskFiles" multiple hidden>
+          </div>
+          <div class="uploaded-files" id="uploadedFiles"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn secondary" onclick="closeModal('newTaskModal')" data-i18n="cancel">取消</button>
+        <button class="btn primary" onclick="createNewTask()">
+          <i class="fas fa-rocket"></i> <span data-i18n="startExecution">开始执行</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal large">
+      <div class="modal-header">
+        <h2><i class="fas fa-cog"></i> <span data-i18n="systemSettings">系统设置</span></h2>
+        <button class="modal-close" onclick="closeModal('settingsModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- API Status -->
+        <div class="settings-section">
+          <h4 data-i18n="apiStatus">API 状态</h4>
+          <div class="api-status-card">
+            <div class="api-status-row">
+              <span data-i18n="connectionStatus">连接状态</span>
+              <span class="status-indicator" id="apiStatusIndicator">
+                <i class="fas fa-circle"></i>
+                <span id="apiStatusText" data-i18n="checking">检测中...</span>
+              </span>
+            </div>
+            <div class="api-status-row">
+              <span data-i18n="currentModel">当前模型</span>
+              <span id="currentModelDisplay">-</span>
+            </div>
+            <div class="api-status-row">
+              <span data-i18n="apiKeyStatus">API Key</span>
+              <span id="apiKeyStatus" data-i18n="notConfigured">未配置</span>
+            </div>
+          </div>
+          <button class="btn secondary full-width mt-md" onclick="checkApiStatus()">
+            <i class="fas fa-sync-alt"></i> <span data-i18n="refreshStatus">刷新状态</span>
+          </button>
+        </div>
+        
+        <!-- Model Management -->
+        <div class="settings-section">
+          <div class="section-header-row">
+            <h4 data-i18n="modelManagement">模型管理</h4>
+            <button class="btn small primary" onclick="showAddModelForm()">
+              <i class="fas fa-plus"></i> <span data-i18n="addModel">添加</span>
+            </button>
+          </div>
+          <div class="model-list" id="modelList">
+            <!-- Models will be rendered here -->
+          </div>
+        </div>
+        
+        <div class="settings-section">
+          <h4>🔍 并行搜索引擎</h4>
+          <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 12px;">
+            选择多个搜索引擎同时搜索，结果将自动合并（建议选择2-4个）
+          </p>
+          <div class="search-engine-selector" id="searchEngineSelector">
+            <label class="engine-checkbox">
+              <input type="checkbox" value="baidu" onchange="updateParallelEngines()">
+              <span class="engine-icon">🔍</span>
+              <span class="engine-name">百度</span>
+            </label>
+            <label class="engine-checkbox">
+              <input type="checkbox" value="bing-cn" onchange="updateParallelEngines()">
+              <span class="engine-icon">🌐</span>
+              <span class="engine-name">必应(国内)</span>
+            </label>
+            <label class="engine-checkbox">
+              <input type="checkbox" value="sogou" onchange="updateParallelEngines()">
+              <span class="engine-icon">🔎</span>
+              <span class="engine-name">搜狗</span>
+            </label>
+            <label class="engine-checkbox">
+              <input type="checkbox" value="360" onchange="updateParallelEngines()">
+              <span class="engine-icon">🛡️</span>
+              <span class="engine-name">360搜索</span>
+            </label>
+            <label class="engine-checkbox">
+              <input type="checkbox" value="google" onchange="updateParallelEngines()">
+              <span class="engine-icon">🔍</span>
+              <span class="engine-name">Google</span>
+            </label>
+            <label class="engine-checkbox">
+              <input type="checkbox" value="bing" onchange="updateParallelEngines()">
+              <span class="engine-icon">🌐</span>
+              <span class="engine-name">Bing(国际)</span>
+            </label>
+            <label class="engine-checkbox">
+              <input type="checkbox" value="duckduckgo" onchange="updateParallelEngines()">
+              <span class="engine-icon">🦆</span>
+              <span class="engine-name">DuckDuckGo</span>
+            </label>
+          </div>
+          <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 8px;">
+            💡 选中的搜索引擎将同时执行搜索，AI会自动合并去重结果
+          </small>
+        </div>
+        
+        <div class="settings-section">
+          <h4 data-i18n="displaySettings">显示设置</h4>
+          <div class="form-group toggle-group">
+            <label data-i18n="autoRetry">自动重试失败步骤</label>
+            <label class="toggle">
+              <input type="checkbox" id="autoRetry" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label data-i18n="maxParallelTasks">最大并行任务数</label>
+            <input type="number" id="maxParallelTasks" value="3" min="1" max="5" onchange="validateMaxParallel(this)">
+            <small style="color: var(--text-muted); font-size: 0.75rem;">最大支持 5 个并行任务</small>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn secondary danger" onclick="restartServer()">
+          <i class="fas fa-redo"></i> <span data-i18n="restart">重启服务</span>
+        </button>
+        <button class="btn secondary" onclick="reloadConfig()">
+          <i class="fas fa-sync-alt"></i> <span data-i18n="reloadConfig">重载配置</span>
+        </button>
+        <button class="btn secondary" onclick="closeModal('settingsModal')" data-i18n="close">关闭</button>
+        <button class="btn primary" onclick="saveSettings()" data-i18n="saveSettings">保存设置</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Add/Edit Model Modal -->
+  <div class="modal-overlay" id="modelFormModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2><i class="fas fa-cube"></i> <span id="modelFormTitle" data-i18n="addModel">添加模型</span></h2>
+        <button class="modal-close" onclick="closeModal('modelFormModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editModelId">
+        <div class="form-group">
+          <label data-i18n="modelId">模型 ID</label>
+          <input type="text" id="modelIdInput" placeholder="gpt-4o-mini">
+          <div class="form-hint" data-i18n="modelIdHint">输入模型ID，系统将自动识别提供商</div>
+        </div>
+        <div class="form-group">
+          <label data-i18n="apiKey">API Key</label>
+          <div class="password-input-wrapper">
+            <input type="password" id="modelApiKeyInput" placeholder="sk-...">
+            <button type="button" class="password-toggle" onclick="toggleApiKeyVisibility()">
+              <i class="fas fa-eye" id="apiKeyToggleIcon"></i>
+            </button>
+          </div>
+          <div class="form-hint" data-i18n="apiKeyHint">API Key 将安全存储在服务端</div>
+        </div>
+        <div class="form-group">
+          <label data-i18n="apiBaseUrl">API Base URL（可选）</label>
+          <input type="text" id="modelApiBaseInput" placeholder="https://api.openai.com/v1">
+          <div class="form-hint" data-i18n="apiBaseUrlHint">留空则使用默认地址</div>
+        </div>
+        <div class="form-group">
+          <label data-i18n="modelName">模型名称（可选）</label>
+          <input type="text" id="modelNameInput" placeholder="GPT-4o Mini">
+        </div>
+        <div class="form-group toggle-group">
+          <label data-i18n="enabled">启用</label>
+          <label class="toggle">
+            <input type="checkbox" id="modelEnabledInput" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="form-group toggle-group">
+          <label data-i18n="setAsDefault">设为默认</label>
+          <label class="toggle">
+            <input type="checkbox" id="modelDefaultInput">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn secondary" onclick="closeModal('modelFormModal')" data-i18n="cancel">取消</button>
+        <button class="btn primary" onclick="saveModel()" data-i18n="save">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Knowledge Base Modal -->
+  <div class="modal-overlay" id="knowledgeBaseModal">
+    <div class="modal extra-large">
+      <div class="modal-header">
+        <h2><i class="fas fa-book"></i> <span data-i18n="knowledgeBase">知识库管理</span></h2>
+        <button class="modal-close" onclick="closeModal('knowledgeBaseModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="kb-header">
+          <div class="kb-tabs">
+            <button class="tab-btn active" onclick="switchKBTab('documents')" data-i18n="documents">文档</button>
+            <button class="tab-btn" onclick="switchKBTab('collections')" data-i18n="collections">集合</button>
+          </div>
+          <div class="kb-actions">
+            <button class="btn primary" onclick="showUploadDocument()">
+              <i class="fas fa-upload"></i> <span data-i18n="uploadDocument">上传文档</span>
+            </button>
+          </div>
+        </div>
+        <div class="kb-content" id="kbContent">
+          <div class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span data-i18n="loading">加载中...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Task Templates Modal (Enterprise Feature) -->
+  <div class="modal-overlay" id="taskTemplatesModal">
+    <div class="modal extra-large">
+      <div class="modal-header">
+        <h2><i class="fas fa-layer-group"></i> <span data-i18n="taskTemplates">任务模板</span></h2>
+        <button class="modal-close" onclick="closeModal('taskTemplatesModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="templates-intro">
+          <p>选择一个模板快速创建任务，或创建自定义模板复用常见工作流程。</p>
+          <div class="enterprise-notice">
+            <i class="fas fa-crown"></i>
+            <span>支持导出为 Excel、PPT、PDF 等企业级格式</span>
+          </div>
+        </div>
+        <div id="templatesContainer" class="templates-container">
+          <div class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i> 加载中...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Workflows Modal -->
+  <div class="modal-overlay" id="workflowsModal">
+    <div class="modal extra-large">
+      <div class="modal-header">
+        <h2><i class="fas fa-project-diagram"></i> <span data-i18n="workflowTemplates">工作流模板</span></h2>
+        <button class="modal-close" onclick="closeModal('workflowsModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="workflow-grid" id="workflowGrid">
+          <div class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span data-i18n="loading">加载中...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Modal -->
+  <div class="modal-overlay" id="statisticsModal">
+    <div class="modal extra-large">
+      <div class="modal-header">
+        <h2><i class="fas fa-chart-line"></i> <span data-i18n="usageStatistics">使用统计</span></h2>
+        <button class="modal-close" onclick="closeModal('statisticsModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="stats-overview" id="statsOverview">
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+            <div class="stat-info">
+              <div class="stat-value" id="statsTotalTasks">0</div>
+              <div class="stat-label" data-i18n="totalTasks">总任务</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon success"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-info">
+              <div class="stat-value" id="statsSuccessRate">0%</div>
+              <div class="stat-label" data-i18n="successRate">成功率</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon warning"><i class="fas fa-coins"></i></div>
+            <div class="stat-info">
+              <div class="stat-value" id="statsTotalTokens">0</div>
+              <div class="stat-label" data-i18n="totalTokens">Tokens</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon danger"><i class="fas fa-dollar-sign"></i></div>
+            <div class="stat-info">
+              <div class="stat-value" id="statsTotalCost">$0.00</div>
+              <div class="stat-label" data-i18n="estimatedCost">预估成本</div>
+            </div>
+          </div>
+        </div>
+        <div class="stats-charts" id="statsCharts">
+          <div class="chart-placeholder">
+            <i class="fas fa-chart-bar"></i>
+            <p data-i18n="statsChartPlaceholder">统计图表将在此显示</p>
+          </div>
+        </div>
+        <div class="stats-actions">
+          <button class="btn secondary" onclick="exportStatistics('json')">
+            <i class="fas fa-download"></i> <span data-i18n="exportJSON">导出 JSON</span>
+          </button>
+          <button class="btn secondary" onclick="exportStatistics('markdown')">
+            <i class="fas fa-file-alt"></i> <span data-i18n="exportMarkdown">导出 Markdown</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Workflow Modal -->
+  <div class="modal-overlay" id="createWorkflowModal">
+    <div class="modal workflow-create-modal">
+      <div class="modal-header">
+        <h2><i class="fas fa-plus-circle"></i> <span data-i18n="createWorkflow">创建自定义工作流</span></h2>
+        <button class="modal-close" onclick="closeModal('createWorkflowModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label data-i18n="workflowName">工作流名称</label>
+          <input type="text" id="newWorkflowName" placeholder="例如：代码审查助手" required>
+        </div>
+        
+        <div class="form-group">
+          <label data-i18n="workflowDescription">工作流描述</label>
+          <input type="text" id="newWorkflowDesc" placeholder="简要描述工作流的功能">
+        </div>
+        
+        <div class="form-group">
+          <label data-i18n="taskTemplate">任务模板</label>
+          <div class="template-hint">
+            <i class="fas fa-lightbulb"></i>
+            使用 <code>{变量名}</code> 语法定义可填写的参数
+          </div>
+          <textarea 
+            id="newWorkflowTemplate" 
+            placeholder="示例：帮我分析 {代码} 中的潜在问题，并提供优化建议"
+            rows="4"
+          ></textarea>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label data-i18n="workflowIcon">图标</label>
+            <select id="newWorkflowIcon">
+              <option value="fas fa-cog">⚙️ 齿轮</option>
+              <option value="fas fa-code">💻 代码</option>
+              <option value="fas fa-search">🔍 搜索</option>
+              <option value="fas fa-chart-line">📈 图表</option>
+              <option value="fas fa-file-alt">📄 文档</option>
+              <option value="fas fa-robot">🤖 机器人</option>
+              <option value="fas fa-magic">✨ 魔法</option>
+              <option value="fas fa-brain">🧠 大脑</option>
+              <option value="fas fa-database">🗄️ 数据库</option>
+              <option value="fas fa-cloud">☁️ 云</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label data-i18n="workflowColor">主题色</label>
+            <div class="color-picker-wrapper">
+              <input type="color" id="newWorkflowColor" value="#8b5cf6">
+              <span class="color-preview" id="colorPreview">#8b5cf6</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label data-i18n="workflowTags">标签（逗号分隔）</label>
+          <input type="text" id="newWorkflowTags" placeholder="自定义, 工具, 效率">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn secondary" onclick="closeModal('createWorkflowModal')" data-i18n="cancel">取消</button>
+        <button class="btn primary" onclick="submitCreateWorkflow()">
+          <i class="fas fa-plus"></i> <span data-i18n="createWorkflow">创建工作流</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Workflow Execute Modal -->
+  <div class="modal-overlay" id="workflowExecuteModal">
+    <div class="modal workflow-execute-modal">
+      <div class="modal-header workflow-execute-header">
+        <div class="workflow-execute-icon" id="executeWorkflowIcon">
+          <i class="fas fa-project-diagram"></i>
+        </div>
+        <div class="workflow-execute-title">
+          <h2 id="executeWorkflowName">执行工作流</h2>
+          <p class="workflow-execute-desc" id="executeWorkflowDesc">请填写以下参数</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('workflowExecuteModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body workflow-execute-body">
+        <div class="workflow-inputs-container" id="workflowInputsContainer">
+          <!-- Dynamic inputs will be generated here -->
+        </div>
+      </div>
+      <div class="modal-footer workflow-execute-footer">
+        <button class="btn secondary" onclick="closeModal('workflowExecuteModal')" data-i18n="cancel">取消</button>
+        <button class="btn primary" id="executeWorkflowBtn" onclick="submitWorkflowExecution()">
+          <i class="fas fa-rocket"></i> <span data-i18n="execute">开始执行</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Schedules Modal -->
+  <div class="modal-overlay" id="schedulesModal">
+    <div class="modal large">
+      <div class="modal-header">
+        <h2><i class="fas fa-clock"></i> <span data-i18n="scheduledTasks">定时任务</span></h2>
+        <button class="modal-close" onclick="closeModal('schedulesModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="schedules-header">
+          <button class="btn primary" onclick="showAddSchedule()">
+            <i class="fas fa-plus"></i> <span data-i18n="addSchedule">添加定时任务</span>
+          </button>
+        </div>
+        <div class="schedules-list" id="schedulesList">
+          <div class="empty-state">
+            <i class="fas fa-calendar-times"></i>
+            <p data-i18n="noSchedules">暂无定时任务</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Document Modal -->
+  <div class="modal-overlay" id="uploadDocumentModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2><i class="fas fa-upload"></i> <span data-i18n="uploadDocument">上传文档</span></h2>
+        <button class="modal-close" onclick="closeModal('uploadDocumentModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label data-i18n="selectFile">选择文件</label>
+          <div class="file-drop-zone" id="fileDropZone">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p data-i18n="dropFileHere">拖拽文件到此处或点击选择</p>
+            <input type="file" id="documentFileInput" hidden accept=".txt,.md,.pdf,.docx,.json,.csv,.html">
+          </div>
+          <div class="selected-file" id="selectedFile"></div>
+        </div>
+        <div class="form-group">
+          <label data-i18n="collection">知识库集合</label>
+          <select id="uploadCollection">
+            <option value="default">default</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label data-i18n="tags">标签 (逗号分隔)</label>
+          <input type="text" id="uploadTags" placeholder="技术, 教程, 参考">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn secondary" onclick="closeModal('uploadDocumentModal')" data-i18n="cancel">取消</button>
+        <button class="btn primary" onclick="uploadDocument()" id="uploadBtn" disabled>
+          <i class="fas fa-upload"></i> <span data-i18n="upload">上传</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/js/task-store.js"></script>
+  <script src="/static/js/i18n.js"></script>
+  <script src="/static/js/app.js"></script>
+  <script src="/static/js/features.js"></script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+version: "3.9"
+
+services:
+  # 向量数据库
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: joinflow-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    environment:
+      - QDRANT__LOG_LEVEL=INFO
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 代码执行沙盒
+  sandbox:
+    image: python:3.11-slim
+    container_name: joinflow-sandbox
+    build:
+      context: .
+      dockerfile: Dockerfile.sandbox
+    volumes:
+      - sandbox_workspace:/workspace
+    working_dir: /workspace
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+    # 安全限制
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+    read_only: false
+    tmpfs:
+      - /tmp:size=100M,mode=1777
+    ulimits:
+      nproc: 100
+      nofile:
+        soft: 1024
+        hard: 2048
+    mem_limit: 512m
+    memswap_limit: 512m
+    cpus: 1
+    pids_limit: 100
+    networks:
+      - sandbox_net
+    restart: unless-stopped
+
+  # Redis 缓存 (可选)
+  redis:
+    image: redis:7-alpine
+    container_name: joinflow-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    profiles:
+      - full
+
+  # JoinFlow 主服务
+  joinflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: joinflow-app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./config.json:/app/config.json
+      - ./workspace:/app/workspace
+      - ./knowledge_base:/app/knowledge_base
+      - ./sessions:/app/sessions
+      - ./exports:/app/exports
+      - ./plugins:/app/plugins
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - QDRANT_URL=http://qdrant:6333
+      - REDIS_URL=redis://redis:6379
+      - SANDBOX_ENABLED=true
+    depends_on:
+      - qdrant
+    networks:
+      - default
+      - sandbox_net
+    restart: unless-stopped
+    profiles:
+      - full
+
+volumes:
+  qdrant_data:
+  sandbox_workspace:
+  redis_data:
+
+networks:
+  sandbox_net:
+    driver: bridge
+    internal: true  # 沙盒网络隔离

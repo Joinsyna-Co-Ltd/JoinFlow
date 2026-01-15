@@ -1,0 +1,5183 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JoinFlow - Workspace</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Task Store -->
+  <script src="/static/js/task-store.js"></script>
+  
+  <!-- i18n -->
+  <script src="/static/js/i18n.js"></script>
+  
+  <style>
+    /* ========================================
+       JOINFLOW AGENT WORKSPACE
+       Cyberpunk-inspired AI Control Interface
+       ======================================== */
+    
+    :root {
+      --bg-void: #030308;
+      --bg-deep: #0a0a12;
+      --bg-surface: #12121a;
+      --bg-elevated: #1a1a24;
+      --bg-glass: rgba(20, 20, 30, 0.85);
+      
+      --border-dim: #1f1f2e;
+      --border-glow: #2a2a40;
+      
+      --text-primary: #e8e8f0;
+      --text-secondary: #8888a0;
+      --text-muted: #505068;
+      
+      --accent-cyan: #00f5ff;
+      --accent-blue: #4d7cff;
+      --accent-purple: #a855f7;
+      --accent-pink: #ff3399;
+      --accent-green: #00ff88;
+      --accent-orange: #ff9500;
+      --accent-red: #ff3355;
+      
+      --glow-cyan: 0 0 20px rgba(0, 245, 255, 0.4);
+      --glow-blue: 0 0 20px rgba(77, 124, 255, 0.4);
+      --glow-purple: 0 0 20px rgba(168, 85, 247, 0.4);
+      --glow-green: 0 0 20px rgba(0, 255, 136, 0.4);
+      
+      --font-display: 'Orbitron', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-body: 'Noto Sans SC', sans-serif;
+      
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-void);
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-glow);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-cyan);
+    }
+
+    /* ========================================
+       PARTICLE BACKGROUND
+       ======================================== */
+    .particles-bg {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .particle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: float linear infinite;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+      10% { opacity: 0.3; }
+      90% { opacity: 0.3; }
+      100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+    }
+
+    .grid-lines {
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(0, 245, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 245, 255, 0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .scan-line {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+      animation: scan 4s linear infinite;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.3;
+    }
+
+    @keyframes scan {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+
+    /* ========================================
+       MAIN LAYOUT
+       ======================================== */
+    .workspace {
+      display: grid;
+      grid-template-rows: 60px 1fr;
+      height: 100vh;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(0, 245, 255, 0.03) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(168, 85, 247, 0.03) 0%, transparent 50%),
+        var(--bg-void);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ========================================
+       HEADER - Command Bar
+       ======================================== */
+    .command-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: var(--bg-glass);
+      border-bottom: 1px solid var(--border-dim);
+      backdrop-filter: blur(20px);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: white;
+      box-shadow: var(--glow-cyan);
+    }
+
+    .logo-text {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--accent-green);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.5); }
+      50% { opacity: 0.8; box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); }
+    }
+
+    .command-input-wrapper {
+      flex: 1;
+      max-width: 600px;
+      margin: 0 32px;
+    }
+
+    .command-input {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-lg);
+      padding: 0 16px;
+      transition: all 0.3s;
+    }
+
+    .command-input:focus-within {
+      border-color: var(--accent-cyan);
+      box-shadow: var(--glow-cyan), inset 0 0 20px rgba(0, 245, 255, 0.05);
+    }
+
+    .command-input i {
+      color: var(--accent-cyan);
+      font-size: 14px;
+    }
+
+    .command-input input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: var(--text-primary);
+    }
+
+    .command-input input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .action-btn {
+      width: 36px;
+      height: 36px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+      background: var(--bg-elevated);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    /* ========================================
+       MAIN CONTENT
+       ======================================== */
+    .main-content {
+      display: grid;
+      grid-template-columns: 320px 1fr 380px;
+      gap: 1px;
+      background: var(--border-dim);
+      overflow: hidden;
+    }
+
+    .panel {
+      background: var(--bg-deep);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .panel-title i {
+      color: var(--accent-cyan);
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    /* ========================================
+       LEFT PANEL - Task Flow
+       ======================================== */
+    .flow-container {
+      padding: 20px 16px;
+    }
+
+    .task-info {
+      background: linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(168, 85, 247, 0.08));
+      border: 1px solid var(--border-glow);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .task-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+    }
+
+    .task-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .task-meta span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Panel Action Button */
+    .panel-action-btn {
+      width: 28px;
+      height: 28px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .panel-action-btn:hover {
+      background: var(--bg-surface);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .panel-action-btn.active {
+      background: rgba(0, 245, 255, 0.1);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    /* Task List Panel */
+    .task-list-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-md);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .task-list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border-dim);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .clear-tasks-btn {
+      padding: 4px 10px;
+      background: transparent;
+      border: 1px solid rgba(255, 51, 85, 0.3);
+      border-radius: var(--radius-sm);
+      color: var(--accent-red);
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .clear-tasks-btn:hover {
+      background: rgba(255, 51, 85, 0.1);
+    }
+
+    .task-list-items {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .task-list-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-dim);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .task-list-item:last-child {
+      border-bottom: none;
+    }
+
+    .task-list-item:hover {
+      background: rgba(0, 245, 255, 0.05);
+    }
+
+    .task-list-item.active {
+      background: rgba(0, 245, 255, 0.1);
+      border-left: 2px solid var(--accent-cyan);
+    }
+
+    .task-item-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-delete-btn {
+      padding: 6px 8px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      opacity: 0.5;
+      transition: all 0.2s;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .task-list-item:hover .task-delete-btn {
+      opacity: 1;
+    }
+
+    .task-delete-btn:hover {
+      color: var(--accent-red);
+      background: rgba(255, 51, 85, 0.1);
+    }
+
+    /* 已完成任务的查看结果按钮 */
+    .task-view-btn {
+      padding: 4px 8px;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: var(--accent-green);
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .task-view-btn:hover {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: var(--accent-green);
+    }
+
+    .task-item-status {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .task-item-status.pending { background: var(--text-muted); }
+    .task-item-status.running { background: var(--accent-cyan); animation: pulse 2s infinite; }
+    .task-item-status.completed { background: var(--accent-green); }
+    .task-item-status.failed { background: var(--accent-red); }
+
+    .task-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-item-title {
+      font-size: 0.8rem;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .task-item-time {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+    }
+
+    /* Empty Steps */
+    .empty-steps {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-steps i {
+      font-size: 32px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    .empty-steps p {
+      font-size: 0.85rem;
+    }
+
+    /* Flow Steps */
+    .flow-steps {
+      position: relative;
+    }
+
+    .flow-step {
+      position: relative;
+      padding-left: 40px;
+      padding-bottom: 32px;
+    }
+
+    .flow-step:last-child {
+      padding-bottom: 0;
+    }
+
+    .flow-step::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 32px;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, var(--border-glow), transparent);
+    }
+
+    .flow-step:last-child::before {
+      display: none;
+    }
+
+    .step-node {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      border: 2px solid var(--border-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.3s;
+    }
+
+    .flow-step.completed .step-node {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+      color: var(--bg-void);
+      box-shadow: var(--glow-green);
+    }
+
+    .flow-step.active .step-node {
+      background: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+      color: var(--bg-void);
+      box-shadow: var(--glow-cyan);
+      animation: activeGlow 1.5s ease-in-out infinite;
+    }
+
+    @keyframes activeGlow {
+      0%, 100% { box-shadow: 0 0 10px rgba(0, 245, 255, 0.5); }
+      50% { box-shadow: 0 0 25px rgba(0, 245, 255, 0.8); }
+    }
+
+    .flow-step.error .step-node {
+      background: var(--accent-red);
+      border-color: var(--accent-red);
+      color: white;
+    }
+
+    .step-content {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      transition: all 0.3s;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .flow-step.active .step-content {
+      border-color: var(--accent-cyan);
+      background: linear-gradient(135deg, rgba(0, 245, 255, 0.05), transparent);
+    }
+
+    .step-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .step-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .step-agent {
+      font-size: 0.65rem;
+      padding: 3px 8px;
+      background: rgba(168, 85, 247, 0.15);
+      color: var(--accent-purple);
+      border-radius: 10px;
+      font-weight: 500;
+    }
+
+    .step-agent.browser { background: rgba(0, 245, 255, 0.15); color: var(--accent-cyan); }
+    .step-agent.llm { background: rgba(168, 85, 247, 0.15); color: var(--accent-purple); }
+    .step-agent.code { background: rgba(255, 149, 0, 0.15); color: var(--accent-orange); }
+    .step-agent.os { background: rgba(0, 255, 136, 0.15); color: var(--accent-green); }
+
+    .step-desc {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      word-break: break-word;
+      max-width: 100%;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .step-progress {
+      margin-top: 10px;
+      height: 3px;
+      background: var(--border-dim);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .step-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+
+    /* ========================================
+       CENTER PANEL - Agent Vision
+       ======================================== */
+    .vision-container {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .vision-screen {
+      flex: 1;
+      position: relative;
+      background: var(--bg-void);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-lg);
+      margin: 16px;
+      overflow: hidden;
+    }
+
+    .screen-frame {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border: 1px solid var(--accent-cyan);
+      border-radius: var(--radius-lg);
+      opacity: 0.3;
+    }
+
+    .screen-frame::before,
+    .screen-frame::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--accent-cyan);
+    }
+
+    .screen-frame::before {
+      top: -1px;
+      left: -1px;
+      border-right: none;
+      border-bottom: none;
+      border-top-left-radius: var(--radius-lg);
+    }
+
+    .screen-frame::after {
+      bottom: -1px;
+      right: -1px;
+      border-left: none;
+      border-top: none;
+      border-bottom-right-radius: var(--radius-lg);
+    }
+
+    .vision-content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .vision-placeholder {
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .vision-placeholder .icon-container {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 24px;
+      position: relative;
+    }
+
+    .icon-ring {
+      position: absolute;
+      inset: 0;
+      border: 2px solid var(--border-glow);
+      border-radius: 50%;
+      animation: ringRotate 10s linear infinite;
+    }
+
+    .icon-ring::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      width: 8px;
+      height: 8px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      box-shadow: var(--glow-cyan);
+    }
+
+    @keyframes ringRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .icon-ring:nth-child(2) {
+      inset: 15px;
+      animation-direction: reverse;
+      animation-duration: 8s;
+    }
+
+    .icon-ring:nth-child(2)::before {
+      background: var(--accent-purple);
+      box-shadow: var(--glow-purple);
+    }
+
+    .icon-core {
+      position: absolute;
+      inset: 30px;
+      background: linear-gradient(135deg, var(--bg-surface), var(--bg-elevated));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: var(--accent-cyan);
+    }
+
+    .vision-placeholder h3 {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .vision-placeholder p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Browser Frame */
+    .browser-frame {
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+    }
+
+    .browser-frame.active {
+      display: flex;
+    }
+
+    /* 多浏览器标签栏 */
+    .browser-tabs {
+      display: flex;
+      gap: 2px;
+      padding: 8px 12px 0;
+      background: var(--bg-void);
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .browser-tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: var(--bg-surface);
+      border-radius: 8px 8px 0 0;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+      border-bottom: none;
+    }
+
+    .browser-tab:hover {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    .browser-tab.active {
+      background: var(--bg-elevated);
+      color: var(--accent-cyan);
+      border-color: var(--border-glow);
+    }
+
+    .browser-tab .tab-icon {
+      font-size: 0.9rem;
+    }
+
+    .browser-tab .tab-status {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+
+    .browser-tab.loading .tab-status {
+      background: var(--accent-cyan);
+      animation: pulse 1s infinite;
+    }
+
+    .browser-tab.done .tab-status {
+      background: var(--accent-green);
+    }
+
+    .browser-info {
+      margin-left: auto;
+    }
+
+    .browser-status-badge {
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(0, 245, 255, 0.1);
+      color: var(--accent-cyan);
+    }
+
+    /* 并行视口容器 - 垂直布局 */
+    .browser-viewports {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 8px;
+      padding: 8px;
+      background: var(--bg-void);
+      overflow: hidden;
+    }
+
+    .main-viewport {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+    }
+
+    /* 多浏览器并行结果 - 底部横向排列 */
+    .browser-viewport-secondary {
+      height: 120px;
+      flex-shrink: 0;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-dim);
+      border-radius: 8px;
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      gap: 1px;
+    }
+
+    .secondary-browser {
+      flex: 1;
+      min-width: 150px;
+      max-width: 300px;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border-dim);
+      background: var(--bg-deep);
+    }
+
+    .secondary-browser:last-child {
+      border-right: none;
+    }
+
+    .secondary-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: var(--bg-elevated);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-dim);
+      flex-shrink: 0;
+    }
+
+    .secondary-header .secondary-icon {
+      font-size: 0.85rem;
+    }
+
+    .secondary-header .secondary-name {
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .secondary-header .secondary-badge {
+      font-size: 0.55rem;
+      padding: 2px 5px;
+      background: rgba(0, 245, 255, 0.15);
+      border-radius: 3px;
+      margin-left: auto;
+      white-space: nowrap;
+      color: var(--accent-cyan);
+      margin-left: auto;
+    }
+
+    .secondary-browser .browser-screenshot {
+      width: 100%;
+      flex: 1;
+      object-fit: cover;
+      background: var(--bg-void);
+    }
+
+    .secondary-status {
+      padding: 4px 10px;
+      font-size: 0.65rem;
+      color: var(--text-secondary);
+      background: var(--bg-elevated);
+      text-align: center;
+    }
+
+    .secondary-status.loading {
+      color: var(--accent-cyan);
+    }
+
+    .secondary-status.done {
+      color: var(--accent-green);
+    }
+
+    /* 快速操作面板 - 覆盖在视口中央 */
+    .quick-actions-panel {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98));
+      border: 2px solid var(--accent-green);
+      border-radius: 20px;
+      padding: 30px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(34, 197, 94, 0.2);
+      animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+
+    .quick-actions-panel .quick-actions-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--accent-green);
+      margin-bottom: 10px;
+    }
+
+    .quick-actions-panel .quick-actions-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(30px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+      }
+    }
+
+    .quick-actions-title {
+      display: none;
+    }
+
+    .quick-action-btn {
+      padding: 14px 24px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: 2px solid transparent;
+      min-width: 140px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .quick-action-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .quick-action-btn:active {
+      transform: translateY(-1px);
+    }
+
+    .quick-action-btn.primary {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      border-color: #22c55e;
+      color: #fff;
+    }
+
+    .quick-action-btn.primary:hover {
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
+    }
+
+    .quick-action-btn.secondary {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      border-color: #3b82f6;
+      color: #fff;
+    }
+
+    .quick-action-btn.secondary:hover {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    }
+
+    .quick-action-btn:not(.primary):not(.secondary) {
+      background: linear-gradient(135deg, #475569, #334155);
+      border-color: #475569;
+      color: #fff;
+    }
+
+    .quick-action-btn:not(.primary):not(.secondary):hover {
+      background: linear-gradient(135deg, #334155, #1e293b);
+      border-color: var(--accent-cyan);
+    }
+
+    /* Toast 消息 */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--accent-green);
+      z-index: 10000;
+      opacity: 0;
+      transition: all 0.3s ease-out;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    
+    .toast-success {
+      border-left: 4px solid #22c55e;
+      background: linear-gradient(135deg, var(--bg-elevated), rgba(34, 197, 94, 0.1));
+    }
+    
+    .toast-error {
+      border-left: 4px solid #ef4444;
+      background: linear-gradient(135deg, var(--bg-elevated), rgba(239, 68, 68, 0.1));
+    }
+    
+    .toast-warning {
+      border-left: 4px solid #f59e0b;
+      background: linear-gradient(135deg, var(--bg-elevated), rgba(245, 158, 11, 0.1));
+    }
+    
+    .toast-info {
+      border-left: 4px solid #3b82f6;
+      background: linear-gradient(135deg, var(--bg-elevated), rgba(59, 130, 246, 0.1));
+    }
+
+    .browser-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .browser-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .browser-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .browser-dots span:nth-child(1) { background: #ff5f57; }
+    .browser-dots span:nth-child(2) { background: #febc2e; }
+    .browser-dots span:nth-child(3) { background: #28c840; }
+
+    .browser-url {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      overflow: hidden;
+    }
+
+    .browser-url span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .browser-url i {
+      color: var(--accent-green);
+      font-size: 10px;
+    }
+
+    .browser-viewport {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .browser-screenshot {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: white;
+    }
+
+    /* Action Overlay */
+    .action-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .cursor-indicator {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      transform: translate(-50%, -50%);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .cursor-indicator::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: 2px solid var(--accent-cyan);
+      border-radius: 50%;
+      animation: cursorPulse 1s ease-out infinite;
+    }
+
+    @keyframes cursorPulse {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(2); opacity: 0; }
+    }
+
+    .cursor-indicator::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 8px;
+      height: 8px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: var(--glow-cyan);
+    }
+
+    /* Vision Controls */
+    .vision-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-dim);
+    }
+
+    .control-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .control-btn:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .control-btn.primary {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      border: none;
+      color: var(--bg-void);
+    }
+
+    .control-btn.primary:hover {
+      box-shadow: var(--glow-cyan);
+    }
+
+    .control-btn.danger {
+      border-color: rgba(255, 51, 85, 0.3);
+      color: var(--accent-red);
+    }
+
+    .control-btn.danger:hover {
+      background: rgba(255, 51, 85, 0.1);
+      border-color: var(--accent-red);
+    }
+
+    .control-btn.success {
+      border-color: rgba(34, 197, 94, 0.5);
+      color: var(--accent-green);
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .control-btn.success:hover {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: var(--accent-green);
+    }
+
+    .control-btn.confirm {
+      border-color: rgba(34, 197, 94, 0.5);
+      color: var(--accent-green);
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .control-btn.confirm:hover {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: var(--accent-green);
+    }
+
+    .control-btn.confirm.waiting {
+      animation: pulse-green 2s infinite;
+    }
+
+    @keyframes pulse-green {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+      50% { box-shadow: 0 0 20px 5px rgba(34, 197, 94, 0.2); }
+    }
+
+    /* ========================================
+       RESULT MODAL
+       ======================================== */
+    .result-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    }
+
+    .result-modal.show {
+      display: flex;
+    }
+
+    .result-modal-content {
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      animation: modal-appear 0.3s ease;
+    }
+
+    @keyframes modal-appear {
+      from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .result-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .result-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .result-header h2 {
+      color: var(--accent-green);
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .result-task {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+      padding: 12px;
+      background: rgba(0, 245, 255, 0.05);
+      border-radius: 8px;
+      border: 1px solid var(--border-dim);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      word-break: break-word;
+      max-width: 100%;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+
+    .result-section {
+      margin-bottom: 24px;
+    }
+
+    .result-section h3 {
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .file-path-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #0a0a1a;
+      border: 1px solid var(--border-dim);
+      border-radius: 8px;
+    }
+
+    .file-path-box code {
+      flex: 1;
+      color: var(--accent-cyan);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      word-break: break-all;
+    }
+
+    .copy-btn {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--accent-cyan);
+      border-radius: 6px;
+      color: var(--accent-cyan);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .copy-btn:hover {
+      background: rgba(0, 245, 255, 0.1);
+    }
+
+    .copy-btn.copied {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+      color: #fff;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .result-btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .result-btn.secondary {
+      background: transparent;
+      border: 1px solid var(--border-dim);
+      color: var(--text-secondary);
+    }
+
+    .result-btn.secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--text-muted);
+    }
+
+    .result-btn.primary {
+      background: linear-gradient(135deg, var(--accent-green), #16a34a);
+      border: none;
+      color: #fff;
+    }
+
+    .result-btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(34, 197, 94, 0.3);
+    }
+
+    /* Export Dropdown Styles */
+    .export-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .export-trigger {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+      border: none !important;
+    }
+
+    .export-trigger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .export-menu {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 12px;
+      padding: 8px 0;
+      min-width: 220px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+      margin-bottom: 10px;
+      z-index: 10000;
+    }
+
+    .export-dropdown:hover .export-menu {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .export-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      color: var(--text-secondary);
+    }
+
+    .export-item:hover {
+      background: rgba(99, 102, 241, 0.15);
+      color: #fff;
+    }
+
+    .export-icon {
+      font-size: 1.2em;
+    }
+
+    .export-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 8px 0;
+    }
+
+    .export-item.restricted {
+      position: relative;
+    }
+
+    .plan-badge {
+      font-size: 0.6rem;
+      padding: 2px 8px;
+      color: #fff;
+      border-radius: 4px;
+      margin-left: auto;
+      font-weight: 600;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    
+    .plan-badge.plan-free {
+      background: linear-gradient(135deg, #6b7280, #4b5563);
+    }
+    
+    .plan-badge.plan-pro {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    }
+    
+    .plan-badge.plan-team {
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+    }
+    
+    .plan-badge.plan-enterprise {
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+    }
+    
+    .export-item.locked {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .export-item.locked:hover {
+      background: transparent !important;
+    }
+    
+    .export-item .lock-icon {
+      font-size: 0.7rem;
+    }
+    
+    /* 保留旧的 enterprise-badge 以兼容 */
+    .enterprise-badge {
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: #fff;
+      border-radius: 4px;
+      margin-left: auto;
+      font-weight: 600;
+    }
+
+    .result-tip {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+    }
+
+    .result-tip code {
+      color: var(--accent-purple);
+      background: rgba(139, 92, 246, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    
+    /* 限制提示模态框样式 */
+    .limit-content {
+      text-align: center;
+      padding: 20px 0;
+    }
+    
+    .limit-icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+    }
+    
+    .limit-content h2 {
+      color: #f59e0b;
+      font-size: 1.4rem;
+      margin-bottom: 12px;
+    }
+    
+    .limit-desc {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    
+    .limit-desc strong {
+      color: var(--accent-cyan);
+    }
+    
+    .limit-usage {
+      margin: 20px 0;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+    }
+    
+    .usage-bar {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    
+    .usage-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f59e0b, #ef4444);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    
+    .usage-text {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    
+    .limit-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    
+    .limit-actions .result-btn.primary {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+    
+    .limit-actions .result-btn.primary:hover {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    }
+    
+    .limit-tip {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .limit-tip i {
+      margin-right: 6px;
+      color: var(--accent-blue);
+    }
+
+    .result-modal-content.large {
+      max-width: 700px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .result-preview {
+      margin-bottom: 16px;
+    }
+
+    .result-content-box {
+      background: #0a0a1a;
+      border: 1px solid var(--border-dim);
+      border-radius: 8px;
+      padding: 16px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    .result-content-box h1 {
+      font-size: 1.2rem;
+      color: var(--accent-cyan);
+      margin: 12px 0 8px;
+    }
+
+    .result-content-box h2 {
+      font-size: 1rem;
+      color: var(--text-primary);
+      margin: 10px 0 6px;
+    }
+
+    .result-content-box h3 {
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      margin: 8px 0 4px;
+    }
+
+    .result-content-box strong {
+      color: var(--accent-cyan);
+    }
+
+    .result-content-box code {
+      background: rgba(0, 245, 255, 0.1);
+      padding: 2px 4px;
+      border-radius: 3px;
+      color: var(--accent-cyan);
+    }
+
+    .result-content-box blockquote {
+      border-left: 3px solid var(--accent-purple);
+      padding-left: 12px;
+      margin: 8px 0;
+      color: var(--text-muted);
+    }
+
+    .result-content-box li {
+      margin-left: 20px;
+      list-style: disc;
+    }
+
+    .view-full-btn {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      background: transparent;
+      border: 1px dashed var(--border-dim);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .view-full-btn:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    /* ========================================
+       RIGHT PANEL - Agent Console
+       ======================================== */
+    .console-container {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Thinking Section */
+    .thinking-section {
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.05), transparent);
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .thinking-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent-purple);
+    }
+
+    .thinking-content {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      padding-left: 20px;
+      border-left: 2px solid var(--accent-purple);
+    }
+
+    .typing-indicator {
+      display: inline-flex;
+      gap: 4px;
+      margin-left: 8px;
+    }
+
+    .typing-indicator span {
+      width: 4px;
+      height: 4px;
+      background: var(--accent-purple);
+      border-radius: 50%;
+      animation: typing 1s ease-in-out infinite;
+    }
+
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing {
+      0%, 100% { opacity: 0.3; transform: translateY(0); }
+      50% { opacity: 1; transform: translateY(-4px); }
+    }
+
+    /* Logs Section */
+    .logs-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .logs-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .logs-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+    }
+
+    .logs-title i {
+      color: var(--accent-green);
+    }
+
+    .logs-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .log-filter {
+      padding: 4px 10px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-sm);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .log-filter.active,
+    .log-filter:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .logs-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    .log-entry {
+      display: flex;
+      padding: 8px 16px;
+      border-left: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .log-entry:hover {
+      background: rgba(0, 245, 255, 0.03);
+    }
+
+    .log-entry.action { border-left-color: var(--accent-cyan); }
+    .log-entry.success { border-left-color: var(--accent-green); }
+    .log-entry.error { border-left-color: var(--accent-red); }
+    .log-entry.thinking { border-left-color: var(--accent-purple); }
+
+    .log-time {
+      width: 70px;
+      flex-shrink: 0;
+      color: var(--text-muted);
+    }
+
+    .log-icon {
+      width: 24px;
+      flex-shrink: 0;
+      text-align: center;
+    }
+
+    .log-entry.action .log-icon { color: var(--accent-cyan); }
+    .log-entry.success .log-icon { color: var(--accent-green); }
+    .log-entry.error .log-icon { color: var(--accent-red); }
+    .log-entry.thinking .log-icon { color: var(--accent-purple); }
+
+    .log-message {
+      flex: 1;
+      color: var(--text-secondary);
+      word-break: break-word;
+    }
+
+    .log-entry.action .log-message { color: var(--text-primary); }
+
+    /* Stats Section */
+    .stats-section {
+      padding: 16px;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-dim);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 12px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-md);
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    /* ========================================
+       ANIMATIONS
+       ======================================== */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .flow-step {
+      animation: slideIn 0.4s ease-out;
+      animation-fill-mode: backwards;
+    }
+
+    .flow-step:nth-child(1) { animation-delay: 0.1s; }
+    .flow-step:nth-child(2) { animation-delay: 0.2s; }
+    .flow-step:nth-child(3) { animation-delay: 0.3s; }
+    .flow-step:nth-child(4) { animation-delay: 0.4s; }
+    .flow-step:nth-child(5) { animation-delay: 0.5s; }
+
+    .log-entry {
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    /* Glitch Effect for Title */
+    .glitch {
+      position: relative;
+    }
+
+    .glitch::before,
+    .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .glitch::before {
+      animation: glitch-1 2s infinite linear alternate-reverse;
+      clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple));
+    }
+
+    .glitch::after {
+      animation: glitch-2 3s infinite linear alternate-reverse;
+      clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+    }
+
+    @keyframes glitch-1 {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-2px); }
+      40% { transform: translateX(2px); }
+      60% { transform: translateX(-1px); }
+      80% { transform: translateX(1px); }
+    }
+
+    @keyframes glitch-2 {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(2px); }
+      40% { transform: translateX(-2px); }
+      60% { transform: translateX(1px); }
+      80% { transform: translateX(-1px); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="particles-bg" id="particlesBg"></div>
+  <div class="grid-lines"></div>
+  <div class="scan-line"></div>
+
+  <div class="workspace">
+    <!-- Command Bar -->
+    <header class="command-bar">
+      <div class="logo-section">
+        <div class="logo">
+          <div class="logo-icon">
+            <i class="fas fa-atom"></i>
+          </div>
+          <span class="logo-text glitch" data-text="JOINFLOW">JOINFLOW</span>
+        </div>
+        <div class="status-badge" id="systemStatus">
+          <span class="status-dot"></span>
+          <span>AGENT ONLINE</span>
+        </div>
+      </div>
+
+      <div class="command-input-wrapper">
+        <div class="command-input">
+          <i class="fas fa-terminal"></i>
+          <input type="text" id="commandInput" data-i18n-placeholder="wsInputPlaceholder" placeholder="输入任务指令... (按 Enter 执行)" autocomplete="off">
+          <i class="fas fa-paper-plane" style="cursor: pointer; opacity: 0.5;" onclick="executeCommand()"></i>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="action-btn lang-toggle" onclick="toggleLanguage()" title="切换语言 / Toggle Language" style="background: rgba(139, 92, 246, 0.3); font-size: 0.75rem; font-weight: 600; min-width: 32px;">
+          <span id="langLabel">中</span>
+        </button>
+        <button class="action-btn" data-i18n-title="wsHistory" title="历史记录" onclick="workspace.showHistoryPanel()">
+          <i class="fas fa-history"></i>
+        </button>
+        <button class="action-btn" data-i18n-title="wsSettings" title="设置" onclick="workspace.showSettingsModal()">
+          <i class="fas fa-cog"></i>
+        </button>
+        <button class="action-btn" data-i18n-title="wsBackHome" title="返回主页" onclick="location.href='/'">
+          <i class="fas fa-home"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Left Panel: Task Flow -->
+      <div class="panel" id="flowPanel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fas fa-project-diagram"></i>
+            <span data-i18n="wsExecutionFlow">执行流程</span>
+          </div>
+          <button class="panel-action-btn" id="taskListBtn" data-i18n-title="wsTaskList" title="任务列表">
+            <i class="fas fa-list"></i>
+          </button>
+        </div>
+        <div class="panel-content flow-container">
+          <!-- Task List (hidden by default) -->
+          <div class="task-list-panel" id="taskListPanel" style="display: none;">
+            <div class="task-list-header">
+              <span data-i18n="wsHistoryTasks">历史任务</span>
+              <button class="clear-tasks-btn" onclick="workspace.clearTasks()" data-i18n="wsClear">清空</button>
+            </div>
+            <div class="task-list-items" id="taskListItems">
+              <!-- Task items will be dynamically inserted -->
+            </div>
+          </div>
+
+          <!-- Current Task Info -->
+          <div class="task-info" id="taskInfo">
+            <div class="task-title" id="taskTitle" data-i18n="wsWaitingTask">等待任务...</div>
+            <div class="task-meta">
+              <span><i class="fas fa-clock"></i> <span id="taskDuration">00:00</span></span>
+              <span><i class="fas fa-microchip"></i> <span id="taskSteps">0</span> <span data-i18n="wsSteps">步骤</span></span>
+            </div>
+          </div>
+
+          <!-- Dynamic Flow Steps -->
+          <div class="flow-steps" id="flowSteps">
+            <!-- Steps will be dynamically inserted based on real task -->
+            <div class="empty-steps" id="emptySteps">
+              <i class="fas fa-rocket"></i>
+              <p data-i18n="wsEnterTaskToStart">输入任务开始执行</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center Panel: Agent Vision -->
+      <div class="panel" id="visionPanel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fas fa-eye"></i>
+            <span data-i18n="wsAgentVision">Agent 视野</span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <span style="font-size: 0.7rem; color: var(--accent-green);">● LIVE</span>
+          </div>
+        </div>
+        <div class="vision-container">
+          <div class="vision-screen" id="visionScreen">
+            <div class="screen-frame"></div>
+            
+            <div class="vision-content">
+              <!-- Placeholder -->
+              <div class="vision-placeholder" id="visionPlaceholder">
+                <div class="icon-container">
+                  <div class="icon-ring"></div>
+                  <div class="icon-ring"></div>
+                  <div class="icon-core">
+                    <i class="fas fa-robot"></i>
+                  </div>
+                </div>
+                <h3>AGENT STANDBY</h3>
+                <p data-i18n="wsEnterCommandToStart">输入任务指令开始执行</p>
+              </div>
+
+              <!-- Browser Frame (shown when active) -->
+              <div class="browser-frame" id="browserFrame">
+                <!-- 多浏览器标签栏 -->
+                <div class="browser-tabs" id="browserTabs">
+                  <div class="browser-tab active" data-browser="0">
+                    <span class="tab-icon">🔍</span>
+                    <span class="tab-name">百度</span>
+                    <span class="tab-status"></span>
+                  </div>
+                  <div class="browser-tab" data-browser="1">
+                    <span class="tab-icon">🌐</span>
+                    <span class="tab-name">必应</span>
+                    <span class="tab-status"></span>
+                  </div>
+                </div>
+                
+                <!-- 当前浏览器工具栏 -->
+                <div class="browser-toolbar">
+                  <div class="browser-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <div class="browser-url">
+                    <i class="fas fa-lock"></i>
+                    <span id="browserUrl">https://www.baidu.com</span>
+                  </div>
+                  <div class="browser-info">
+                    <span id="browserStatus" class="browser-status-badge" data-i18n="wsStandby">待命</span>
+                  </div>
+                </div>
+                
+                <!-- 并行浏览器视口容器 -->
+                <div class="browser-viewports" id="browserViewports">
+                  <!-- 主视口（大） -->
+                  <div class="browser-viewport main-viewport" id="mainViewport">
+                    <img id="browserScreenshot" class="browser-screenshot" src="" alt="">
+                    <div class="action-overlay">
+                      <div class="cursor-indicator" id="cursorIndicator" style="display: none;"></div>
+                    </div>
+                    
+                    <!-- 完成后的快速操作面板 -->
+                    <div class="quick-actions-panel" id="quickActionsPanel" style="display: none;">
+                      <div class="quick-actions-title" data-i18n="wsTaskSuccess">🎉 任务执行成功！</div>
+                      <p style="color: #94a3b8; margin: 0 0 15px 0; font-size: 0.9rem;" data-i18n="wsSelectAction">选择以下操作查看结果</p>
+                      <div class="quick-actions-buttons">
+                        <button class="quick-action-btn primary" onclick="workspace.viewFullResult()">
+                          <i class="fas fa-eye"></i> <span data-i18n="wsViewResult">查看结果</span>
+                        </button>
+                        <button class="quick-action-btn secondary" onclick="workspace.openResultFile()">
+                          <i class="fas fa-external-link-alt"></i> <span data-i18n="wsOpenFile">打开文件</span>
+                        </button>
+                        <button class="quick-action-btn" onclick="workspace.copyFilePath()">
+                          <i class="fas fa-copy"></i> <span data-i18n="wsCopyPath">复制路径</span>
+                        </button>
+                      </div>
+                      <button style="margin-top: 10px; background: none; border: none; color: #64748b; cursor: pointer; font-size: 0.8rem;" onclick="document.getElementById('quickActionsPanel').style.display='none'" data-i18n="wsClosePanel">
+                        关闭此面板
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- 底部多浏览器并行结果 -->
+                  <div class="browser-viewport-secondary" id="secondaryViewport" style="display: none;">
+                    <div class="secondary-browser" id="browser1Panel">
+                      <div class="secondary-header">
+                        <span class="secondary-icon" id="browser1Icon">🔍</span>
+                        <span class="secondary-name" id="browser1Name">百度</span>
+                        <span class="secondary-badge" id="browser1Status">待命</span>
+                      </div>
+                      <img id="browserScreenshot1" class="browser-screenshot" src="" alt="">
+                    </div>
+                    <div class="secondary-browser" id="browser2Panel">
+                      <div class="secondary-header">
+                        <span class="secondary-icon" id="browser2Icon">🌐</span>
+                        <span class="secondary-name" id="browser2Name">必应</span>
+                        <span class="secondary-badge" id="browser2Status">待命</span>
+                      </div>
+                      <img id="browserScreenshot2" class="browser-screenshot" src="" alt="">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="vision-controls">
+            <button class="control-btn" id="pauseBtn">
+              <i class="fas fa-pause"></i>
+              <span data-i18n="wsPause">暂停</span>
+            </button>
+            <button class="control-btn primary" id="startBtn">
+              <i class="fas fa-play"></i>
+              <span data-i18n="wsStartExecution">开始执行</span>
+            </button>
+            <button class="control-btn danger" id="stopBtn">
+              <i class="fas fa-stop"></i>
+              <span data-i18n="wsStop">终止</span>
+            </button>
+            <!-- 已完成任务的额外按钮 -->
+            <button class="control-btn success" id="viewResultBtn" style="display: none;">
+              <i class="fas fa-eye"></i>
+              <span data-i18n="wsViewResult">查看结果</span>
+            </button>
+            <button class="control-btn" id="rerunBtn" style="display: none;">
+              <i class="fas fa-redo"></i>
+              <span data-i18n="wsRerun">重新执行</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Console -->
+      <div class="panel" id="consolePanel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fas fa-brain"></i>
+            <span data-i18n="wsAgentConsole">Agent 控制台</span>
+          </div>
+        </div>
+        <div class="console-container">
+          <!-- Thinking Section -->
+          <div class="thinking-section" id="thinkingSection">
+            <div class="thinking-header">
+              <i class="fas fa-lightbulb"></i>
+              <span data-i18n="wsAgentThinking">Agent 思考中</span>
+              <div class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+            <div class="thinking-content" id="thinkingContent" data-i18n="wsDefaultThinking">
+              正在分析任务需求，确定最佳执行策略...
+            </div>
+          </div>
+
+          <!-- Logs Section -->
+          <div class="logs-section">
+            <div class="logs-header">
+              <div class="logs-title">
+                <i class="fas fa-terminal"></i>
+                <span data-i18n="wsExecutionLogs">执行日志</span>
+              </div>
+              <div class="logs-actions">
+                <span class="log-filter active" data-i18n="wsFilterAll">全部</span>
+                <span class="log-filter" data-i18n="wsFilterAction">操作</span>
+                <span class="log-filter" data-i18n="wsFilterError">错误</span>
+              </div>
+            </div>
+            <div class="logs-content" id="logsContent">
+              <div class="log-entry thinking">
+                <span class="log-time">15:42:01</span>
+                <span class="log-icon"><i class="fas fa-brain"></i></span>
+                <span class="log-message">分析用户任务: "搜索 Python 教程并总结"</span>
+              </div>
+              <div class="log-entry action">
+                <span class="log-time">15:42:02</span>
+                <span class="log-icon"><i class="fas fa-play"></i></span>
+                <span class="log-message">启动 Browser Agent</span>
+              </div>
+              <div class="log-entry action">
+                <span class="log-time">15:42:03</span>
+                <span class="log-icon"><i class="fas fa-globe"></i></span>
+                <span class="log-message">导航到 https://www.google.com</span>
+              </div>
+              <div class="log-entry action">
+                <span class="log-time">15:42:05</span>
+                <span class="log-icon"><i class="fas fa-keyboard"></i></span>
+                <span class="log-message">输入搜索关键词: "Python 教程 入门"</span>
+              </div>
+              <div class="log-entry success">
+                <span class="log-time">15:42:07</span>
+                <span class="log-icon"><i class="fas fa-check"></i></span>
+                <span class="log-message">获取到 10 条搜索结果</span>
+              </div>
+              <div class="log-entry action">
+                <span class="log-time">15:42:08</span>
+                <span class="log-icon"><i class="fas fa-mouse-pointer"></i></span>
+                <span class="log-message">点击第一条搜索结果</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats Section -->
+          <div class="stats-section">
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-value" id="statDuration">02:35</div>
+                <div class="stat-label" data-i18n="wsDuration">运行时长</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="statSteps">12</div>
+                <div class="stat-label" data-i18n="wsStepsCount">执行步骤</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="statTokens">1.2K</div>
+                <div class="stat-label">Tokens</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ========================================
+    // JOINFLOW AGENT WORKSPACE CONTROLLER
+    // Production-Ready Version with TaskStore Integration
+    // ========================================
+
+    class AgentWorkspace {
+      constructor() {
+        this.currentTask = null;
+        this.isRunning = false;
+        this.isPaused = false;
+        this.ws = null;
+        this.startTime = null;
+        this.durationTimer = null;
+        this.showTaskList = false;
+        
+        // 订阅状态管理
+        this.subscription = {
+          plan_type: 'free',  // free, pro, team, enterprise
+          plan_id: 'free',
+          status: 'active',
+          limits: {
+            tasks_per_day: 5,
+            agents: ['browser', 'llm'],
+            export_formats: ['markdown'],
+            knowledge_base_docs: 10,
+            parallel_tasks: 1
+          }
+        };
+
+        this.init();
+      }
+
+      init() {
+        this.bindEvents();
+        this.loadCurrentTask();
+        this.subscribeToTaskStore();
+        this.renderTaskList();
+        this.loadSubscription();
+      }
+      
+      // 加载订阅状态
+      async loadSubscription() {
+        try {
+          const response = await fetch('/api/subscription');
+          if (response.ok) {
+            const data = await response.json();
+            this.subscription = {
+              plan_type: data.subscription?.plan_type || 'free',
+              plan_id: data.subscription?.plan_id || 'free',
+              status: data.subscription?.status || 'active',
+              limits: data.limits || this.subscription.limits
+            };
+            console.log('Subscription loaded:', this.subscription);
+          }
+        } catch (error) {
+          console.warn('Failed to load subscription, using free plan:', error);
+        }
+      }
+      
+      // 检查功能是否可用
+      canUseFeature(feature) {
+        const limits = this.subscription.limits;
+        
+        if (feature.startsWith('export_')) {
+          const format = feature.replace('export_', '');
+          return limits.export_formats?.includes(format) || false;
+        }
+        
+        if (feature.startsWith('agent_')) {
+          const agent = feature.replace('agent_', '');
+          return limits.agents?.includes(agent) || false;
+        }
+        
+        return true;
+      }
+      
+      // 获取功能所需的最低版本
+      getRequiredPlan(feature) {
+        // 定义每个功能所需的最低版本
+        const featurePlans = {
+          'export_markdown': 'free',
+          'export_html': 'pro',
+          'export_json': 'pro',
+          'export_pdf': 'pro',
+          'export_excel': 'pro',
+          'export_pptx': 'team',
+          'agent_browser': 'free',
+          'agent_llm': 'free',
+          'agent_os': 'pro',
+          'agent_code': 'pro',
+          'agent_data': 'pro',
+          'agent_vision': 'pro'
+        };
+        return featurePlans[feature] || 'free';
+      }
+      
+      // 获取版本显示名称
+      getPlanDisplayName(planType) {
+        const names = {
+          'free': '免费版',
+          'pro': '专业版',
+          'team': '团队版',
+          'enterprise': '企业版'
+        };
+        return names[planType] || planType;
+      }
+      
+      // 获取版本颜色类
+      getPlanColorClass(planType) {
+        const colors = {
+          'free': 'plan-free',
+          'pro': 'plan-pro',
+          'team': 'plan-team',
+          'enterprise': 'plan-enterprise'
+        };
+        return colors[planType] || 'plan-free';
+      }
+
+      bindEvents() {
+        // Command input
+        document.getElementById('commandInput').addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            this.executeCommand(e.target.value);
+            e.target.value = '';
+          }
+        });
+
+        // Control buttons
+        document.getElementById('startBtn').addEventListener('click', () => this.resumeTask());
+        document.getElementById('pauseBtn').addEventListener('click', () => this.togglePause());
+        document.getElementById('stopBtn').addEventListener('click', () => this.stop());
+        document.getElementById('viewResultBtn').addEventListener('click', () => this.viewCurrentResult());
+        document.getElementById('rerunBtn').addEventListener('click', () => this.rerunTask());
+
+        // Task list toggle
+        document.getElementById('taskListBtn').addEventListener('click', () => this.toggleTaskList());
+
+        // Log filters
+        document.querySelectorAll('.log-filter').forEach(filter => {
+          filter.addEventListener('click', (e) => {
+            document.querySelectorAll('.log-filter').forEach(f => f.classList.remove('active'));
+            e.target.classList.add('active');
+          });
+        });
+      }
+
+      subscribeToTaskStore() {
+        // Subscribe to task store changes
+        if (window.taskStore) {
+          window.taskStore.subscribe((allTasks, currentTask) => {
+            this.renderTaskList();
+            if (currentTask) {
+              this.loadTask(currentTask);
+            }
+          });
+        }
+      }
+
+      loadCurrentTask() {
+        // 先强制从 localStorage 重新加载，确保跨标签页同步
+        if (window.taskStore) {
+          window.taskStore.loadFromStorage();
+          
+          const task = window.taskStore.getCurrentTask();
+          if (task) {
+            this.loadTask(task);
+          } else {
+            // 如果没有当前任务，重置界面
+            this.reset();
+          }
+          
+          // 更新任务列表
+          this.renderTaskList();
+        }
+      }
+
+      loadTask(task) {
+        this.currentTask = task;
+        
+        // Update UI
+        document.getElementById('taskTitle').textContent = task.description;
+        document.getElementById('commandInput').value = task.description;
+        
+        // Render steps
+        this.renderSteps(task.steps);
+        
+        // Render logs
+        this.renderLogs(task.logs);
+        
+        // Update stats
+        document.getElementById('taskSteps').textContent = task.steps.length;
+        
+        // Update status based on task status
+        this.updateStatusUI(task.status);
+        
+        // Update control buttons based on task status
+        this.updateControlButtons(task);
+        
+        // If task is running, continue execution
+        if (task.status === 'running') {
+          this.isRunning = true;
+          this.startTime = new Date(task.startedAt).getTime();
+          this.startDurationTimer();
+          this.showBrowserFrame();
+        }
+        // 自动规划模式：如果任务是 pending 状态且模式是 auto，自动开始执行
+        else if (task.status === 'pending' && task.mode !== 'step-by-step' && task.mode !== 'step') {
+          // 延迟一小段时间后自动开始，让用户看到界面加载完成
+          setTimeout(() => {
+            if (this.currentTask && this.currentTask.id === task.id && this.currentTask.status === 'pending') {
+              console.log('自动规划模式：自动开始执行任务');
+              this.resumeTask();
+            }
+          }, 500);
+        }
+      }
+
+      // 根据任务状态更新控制按钮
+      updateControlButtons(task) {
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const viewResultBtn = document.getElementById('viewResultBtn');
+        const rerunBtn = document.getElementById('rerunBtn');
+        
+        if (task.status === 'completed') {
+          // 已完成任务：显示查看结果和重新执行按钮
+          startBtn.style.display = 'none';
+          pauseBtn.style.display = 'none';
+          stopBtn.style.display = 'none';
+          viewResultBtn.style.display = 'flex';
+          rerunBtn.style.display = 'flex';
+        } else {
+          // 未完成任务：显示正常控制按钮
+          startBtn.style.display = 'flex';
+          pauseBtn.style.display = 'flex';
+          stopBtn.style.display = 'flex';
+          viewResultBtn.style.display = 'none';
+          rerunBtn.style.display = 'none';
+        }
+      }
+
+      // 查看当前任务结果
+      viewCurrentResult() {
+        if (this.currentTask) {
+          this.viewTaskResult(this.currentTask.id);
+        }
+      }
+
+      renderSteps(steps) {
+        const container = document.getElementById('flowSteps');
+        
+        if (!steps || steps.length === 0) {
+          container.innerHTML = `
+            <div class="empty-steps" id="emptySteps">
+              <i class="fas fa-rocket"></i>
+              <p>输入任务开始执行</p>
+            </div>
+          `;
+          return;
+        }
+        
+        container.innerHTML = steps.map((step, index) => {
+          const statusClass = step.status === 'completed' ? 'completed' : 
+                             step.status === 'running' ? 'active' : 
+                             step.status === 'failed' ? 'error' : '';
+          const nodeContent = step.status === 'completed' ? '<i class="fas fa-check"></i>' : 
+                             step.status === 'failed' ? '<i class="fas fa-times"></i>' : 
+                             (index + 1);
+          
+          return `
+            <div class="flow-step ${statusClass}">
+              <div class="step-node">${nodeContent}</div>
+              <div class="step-content">
+                <div class="step-header">
+                  <span class="step-name">${step.name}</span>
+                  <span class="step-agent ${step.agent}">${step.agent.toUpperCase()}</span>
+                </div>
+                <div class="step-desc">${step.description}</div>
+                ${step.status === 'running' ? '<div class="step-progress"><div class="step-progress-bar" style="width: 50%"></div></div>' : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      renderLogs(logs) {
+        const container = document.getElementById('logsContent');
+        
+        if (!logs || logs.length === 0) {
+          container.innerHTML = '';
+          return;
+        }
+        
+        container.innerHTML = logs.map(log => {
+          const icons = {
+            'action': 'fa-play',
+            'success': 'fa-check',
+            'error': 'fa-exclamation-circle',
+            'thinking': 'fa-brain'
+          };
+          
+          return `
+            <div class="log-entry ${log.type}">
+              <span class="log-time">${log.time}</span>
+              <span class="log-icon"><i class="fas ${icons[log.type] || 'fa-info'}"></i></span>
+              <span class="log-message">${log.message}</span>
+            </div>
+          `;
+        }).join('');
+        
+        container.scrollTop = container.scrollHeight;
+      }
+
+      renderTaskList() {
+        const container = document.getElementById('taskListItems');
+        if (!container || !window.taskStore) return;
+        
+        const tasks = window.taskStore.getAllTasks();
+        const currentTaskId = this.currentTask?.id;
+        
+        if (tasks.length === 0) {
+          const noTasksText = typeof i18n !== 'undefined' ? i18n.t('noActiveTasks') : '暂无任务';
+          container.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.8rem;">${noTasksText}</div>`;
+          return;
+        }
+        
+        container.innerHTML = tasks.slice(0, 20).map(task => `
+          <div class="task-list-item ${task.id === currentTaskId ? 'active' : ''}">
+            <div class="task-item-main" onclick="workspace.selectTask('${task.id}')">
+              <div class="task-item-status ${task.status}"></div>
+              <div class="task-item-info">
+                <div class="task-item-title">${this.escapeHtml(task.description)}</div>
+                <div class="task-item-time">${new Date(task.createdAt).toLocaleString()}</div>
+              </div>
+            </div>
+            ${task.status === 'completed' && task.resultContent ? `
+              <button class="task-view-btn" onclick="event.stopPropagation(); workspace.viewTaskResult('${task.id}')" title="查看结果">
+                <i class="fas fa-eye"></i> 结果
+              </button>
+            ` : ''}
+            <button class="task-delete-btn" onclick="event.stopPropagation(); workspace.deleteTask('${task.id}')" title="删除任务">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        `).join('');
+      }
+
+      // HTML 转义
+      escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // 删除单个任务
+      deleteTask(taskId) {
+        if (confirm('确定要删除这个任务吗？')) {
+          if (window.taskStore) {
+            window.taskStore.deleteTask(taskId);
+            this.renderTaskList();
+            
+            // 如果删除的是当前任务，重置界面
+            if (this.currentTask?.id === taskId) {
+              this.reset();
+            }
+          }
+        }
+      }
+
+      // 查看任务结果
+      viewTaskResult(taskId) {
+        const task = window.taskStore?.getTask(taskId);
+        if (task && task.resultContent) {
+          this.showResultModal(task.description, task.resultPath, task.resultContent);
+        } else if (task && task.resultPath) {
+          // 如果有文件路径但没有内容，尝试从文件读取
+          this.loadAndShowResult(task);
+        } else {
+          alert('该任务没有保存结果内容');
+        }
+      }
+
+      // 从文件加载并显示结果
+      async loadAndShowResult(task) {
+        if (!task.resultPath) return;
+        
+        try {
+          const filename = task.resultPath.replace('workspace/results/', '');
+          const response = await fetch(`/api/results/read/${filename}`);
+          const data = await response.json();
+          
+          if (data.success) {
+            this.showResultModal(task.description, task.resultPath, data.content);
+          } else {
+            alert('无法读取结果文件');
+          }
+        } catch (e) {
+          console.error('Failed to load result:', e);
+          alert('加载结果失败');
+        }
+      }
+
+      // 重新执行任务
+      rerunTask() {
+        if (!this.currentTask) return;
+        
+        // 重置任务状态
+        const taskId = this.currentTask.id;
+        if (window.taskStore) {
+          window.taskStore.updateTask(taskId, {
+            status: 'pending',
+            startedAt: null,
+            completedAt: null,
+            logs: [],
+            resultContent: null,
+            resultPath: null
+          });
+          
+          // 重新生成步骤
+          const steps = window.taskStore.analyzeTask(this.currentTask.description);
+          window.taskStore.updateTask(taskId, { steps });
+        }
+        
+        // 重新加载并执行
+        const task = window.taskStore?.getTask(taskId);
+        if (task) {
+          this.loadTask(task);
+          this.start();
+        }
+      }
+
+      toggleTaskList() {
+        this.showTaskList = !this.showTaskList;
+        const panel = document.getElementById('taskListPanel');
+        const btn = document.getElementById('taskListBtn');
+        
+        panel.style.display = this.showTaskList ? 'block' : 'none';
+        btn.classList.toggle('active', this.showTaskList);
+      }
+
+      selectTask(taskId) {
+        if (window.taskStore) {
+          window.taskStore.setCurrentTask(taskId);
+          const task = window.taskStore.getTask(taskId);
+          if (task) {
+            this.loadTask(task);
+          }
+        }
+      }
+
+      clearTasks() {
+        if (confirm('确定要清空所有任务吗？')) {
+          if (window.taskStore) {
+            window.taskStore.clearAllTasks();
+          }
+          this.reset();
+        }
+      }
+
+      reset() {
+        this.currentTask = null;
+        this.isRunning = false;
+        this.isPaused = false;
+        this.stopDurationTimer();
+        
+        document.getElementById('taskTitle').textContent = typeof i18n !== 'undefined' ? i18n.t('wsWaitingTask') : '等待任务...';
+        document.getElementById('commandInput').value = '';
+        document.getElementById('taskDuration').textContent = '00:00';
+        document.getElementById('taskSteps').textContent = '0';
+        document.getElementById('statSteps').textContent = '0';
+        document.getElementById('statDuration').textContent = '00:00';
+        document.getElementById('logsContent').innerHTML = '';
+        
+        this.renderSteps([]);
+        this.updateStatusUI('pending');
+        this.hideBrowserFrame();
+      }
+
+      async executeCommand(command) {
+        if (!command.trim()) return;
+        
+        // 检查每日任务数量限制
+        const limitCheck = await this.checkTaskLimit();
+        if (!limitCheck.allowed) {
+          this.showLimitModal(limitCheck);
+          return;
+        }
+        
+        // Create task in store
+        if (window.taskStore) {
+          const task = window.taskStore.createTask(command);
+          this.loadTask(task);
+          
+          // Start execution
+          this.startTask(task.id);
+        }
+      }
+      
+      // 检查任务限制
+      async checkTaskLimit() {
+        const limits = this.subscription.limits;
+        const tasksPerDay = limits.tasks_per_day;
+        
+        // 无限制
+        if (tasksPerDay === -1) {
+          return { allowed: true };
+        }
+        
+        // 获取今日已执行的任务数
+        const todayTasks = this.getTodayTaskCount();
+        
+        if (todayTasks >= tasksPerDay) {
+          return {
+            allowed: false,
+            type: 'task_limit',
+            current: todayTasks,
+            limit: tasksPerDay,
+            planType: this.subscription.plan_type
+          };
+        }
+        
+        return { 
+          allowed: true, 
+          remaining: tasksPerDay - todayTasks 
+        };
+      }
+      
+      // 获取今日任务数量
+      getTodayTaskCount() {
+        if (!window.taskStore) return 0;
+        
+        const today = new Date().toDateString();
+        const tasks = window.taskStore.tasks || [];
+        
+        return tasks.filter(task => {
+          const taskDate = new Date(task.createdAt).toDateString();
+          return taskDate === today;
+        }).length;
+      }
+      
+      // 检查 Agent 是否可用
+      checkAgentAccess(agentType) {
+        const allowedAgents = this.subscription.limits.agents || ['browser', 'llm'];
+        return allowedAgents.includes(agentType);
+      }
+      
+      // 显示限制提示模态框
+      showLimitModal(limitInfo) {
+        const planName = this.getPlanDisplayName(this.subscription.plan_type);
+        
+        let modal = document.getElementById('limitModal');
+        if (!modal) {
+          modal = document.createElement('div');
+          modal.id = 'limitModal';
+          modal.className = 'result-modal';
+          document.body.appendChild(modal);
+        }
+        
+        let content = '';
+        let upgradeText = '';
+        
+        if (limitInfo.type === 'task_limit') {
+          content = `
+            <div class="limit-icon">🚫</div>
+            <h2>今日任务数已达上限</h2>
+            <p class="limit-desc">
+              您的 <strong>${planName}</strong> 每日可执行 <strong>${limitInfo.limit}</strong> 个任务，
+              今日已执行 <strong>${limitInfo.current}</strong> 个。
+            </p>
+          `;
+          upgradeText = '升级到专业版获得无限任务';
+        } else if (limitInfo.type === 'agent_limit') {
+          content = `
+            <div class="limit-icon">🔒</div>
+            <h2>Agent 功能受限</h2>
+            <p class="limit-desc">
+              <strong>${limitInfo.agentName}</strong> Agent 需要 <strong>${this.getPlanDisplayName(limitInfo.requiredPlan)}</strong> 才能使用。
+              您当前是 <strong>${planName}</strong>。
+            </p>
+          `;
+          upgradeText = `升级到${this.getPlanDisplayName(limitInfo.requiredPlan)}解锁此功能`;
+        } else if (limitInfo.type === 'parallel_limit') {
+          content = `
+            <div class="limit-icon">⏳</div>
+            <h2>并行任务数已达上限</h2>
+            <p class="limit-desc">
+              您的 <strong>${planName}</strong> 最多同时执行 <strong>${limitInfo.limit}</strong> 个任务。
+              请等待当前任务完成后再试。
+            </p>
+          `;
+          upgradeText = '升级获得更多并行任务';
+        }
+        
+        modal.innerHTML = `
+          <div class="result-modal-content" style="max-width: 450px;">
+            <div class="limit-content">
+              ${content}
+            </div>
+            <div class="limit-usage">
+              <div class="usage-bar">
+                <div class="usage-fill" style="width: ${Math.min(100, (limitInfo.current / limitInfo.limit) * 100)}%"></div>
+              </div>
+              <div class="usage-text">${limitInfo.current} / ${limitInfo.limit} 已使用</div>
+            </div>
+            <div class="limit-actions">
+              <button class="result-btn secondary" onclick="document.getElementById('limitModal').style.display='none'">
+                <i class="fas fa-times"></i> 我知道了
+              </button>
+              <button class="result-btn primary" onclick="window.location.href='/pricing'">
+                <i class="fas fa-crown"></i> ${upgradeText}
+              </button>
+            </div>
+            <div class="limit-tip">
+              <i class="fas fa-info-circle"></i>
+              限制将在明天 00:00 重置
+            </div>
+          </div>
+        `;
+        
+        modal.style.display = 'flex';
+        
+        // 点击背景关闭
+        modal.onclick = (e) => {
+          if (e.target === modal) {
+            modal.style.display = 'none';
+          }
+        };
+      }
+
+      startTask(taskId) {
+        if (this.isRunning) return;
+        
+        if (window.taskStore) {
+          const task = window.taskStore.startTask(taskId);
+          if (task) {
+            this.currentTask = task;
+            this.isRunning = true;
+            this.startTime = Date.now();
+            this.startDurationTimer();
+            
+            this.showBrowserFrame();
+            this.updateStatusUI('running');
+            
+            // Add initial logs
+            window.taskStore.addLog(taskId, 'thinking', `分析用户任务: "${task.description}"`);
+            window.taskStore.addLog(taskId, 'action', '开始执行任务...');
+            
+            // Connect and run
+            this.connectWebSocket(taskId);
+          }
+        }
+      }
+
+      resumeTask() {
+        if (this.currentTask && this.currentTask.status === 'pending') {
+          this.startTask(this.currentTask.id);
+        }
+      }
+
+      showBrowserFrame() {
+        // 检查当前任务的步骤是否包含浏览器步骤
+        const task = this.currentTask || window.taskStore?.getCurrentTask();
+        const hasBrowserStep = task?.steps?.some(step => step.agent === 'browser') ?? false;
+        const hasOsOnlySteps = task?.steps?.every(step => 
+          step.agent === 'os' || step.agent === 'llm' || step.agent === 'display'
+        ) ?? false;
+        
+        if (hasBrowserStep) {
+          // 有浏览器步骤：显示浏览器 UI
+          document.getElementById('visionPlaceholder').style.display = 'none';
+          document.getElementById('browserFrame').classList.add('active');
+          this.initBrowserTabs();
+        } else if (hasOsOnlySteps) {
+          // 只有系统操作步骤：显示系统操作 UI
+          document.getElementById('visionPlaceholder').style.display = 'none';
+          document.getElementById('browserFrame').classList.add('active');
+          // 隐藏浏览器标签栏，显示系统操作界面
+          this.initSystemOperationUI();
+        } else {
+          // 默认行为
+          document.getElementById('visionPlaceholder').style.display = 'none';
+          document.getElementById('browserFrame').classList.add('active');
+          this.initBrowserTabs();
+        }
+      }
+
+      hideBrowserFrame() {
+        document.getElementById('visionPlaceholder').style.display = 'flex';
+        document.getElementById('browserFrame').classList.remove('active');
+      }
+      
+      // 初始化系统操作 UI（非浏览器任务）
+      initSystemOperationUI() {
+        const tabsContainer = document.getElementById('browserTabs');
+        if (tabsContainer) {
+          tabsContainer.innerHTML = `
+            <div class="browser-tab active" data-browser="0" data-engine="system">
+              <span class="tab-icon">💻</span>
+              <span class="tab-name">系统操作</span>
+              <span class="tab-status"></span>
+            </div>
+          `;
+        }
+        
+        // 更新URL显示为系统操作信息
+        document.getElementById('browserUrl').textContent = '本机系统操作中...';
+        
+        // 隐藏副视口
+        const secondaryViewport = document.getElementById('secondaryViewport');
+        if (secondaryViewport) {
+          secondaryViewport.style.display = 'none';
+        }
+        
+        // 更新主视口显示系统操作信息
+        const mainScreenshot = document.getElementById('browserScreenshot');
+        if (mainScreenshot) {
+          mainScreenshot.src = this.createSystemOperationScreenshot();
+        }
+      }
+      
+      // 创建系统操作截图
+      createSystemOperationScreenshot() {
+        return `data:image/svg+xml,${encodeURIComponent(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+            <rect fill="#1a1a2e" width="800" height="600"/>
+            <rect x="100" y="80" width="600" height="440" rx="12" fill="#16213e" stroke="#4a5568" stroke-width="2"/>
+            <text x="400" y="200" text-anchor="middle" font-size="48" font-family="Arial" fill="#00f5ff">💻</text>
+            <text x="400" y="270" text-anchor="middle" font-size="24" font-family="Arial" fill="#e8e8e8">系统操作执行中</text>
+            <text x="400" y="310" text-anchor="middle" font-size="14" font-family="Arial" fill="#a0aec0">正在执行本机操作...</text>
+            <rect x="250" y="350" width="300" height="8" rx="4" fill="#2d3748"/>
+            <rect x="250" y="350" width="180" height="8" rx="4" fill="#00f5ff">
+              <animate attributeName="width" from="0" to="300" dur="3s" repeatCount="indefinite"/>
+            </rect>
+            <text x="400" y="400" text-anchor="middle" font-size="12" font-family="Arial" fill="#718096">• 打开应用 • 文件操作 • 系统命令</text>
+          </svg>
+        `)}`
+      }
+
+      // 初始化多浏览器标签
+      initBrowserTabs() {
+        const engines = window.taskStore?.getParallelSearchEngines() || [
+          { id: 'baidu', name: '百度', icon: '🔍' },
+          { id: 'bing-cn', name: '必应', icon: '🌐' }
+        ];
+        
+        const tabsContainer = document.getElementById('browserTabs');
+        if (tabsContainer) {
+          tabsContainer.innerHTML = engines.map((engine, index) => `
+            <div class="browser-tab ${index === 0 ? 'active' : ''}" data-browser="${index}" data-engine="${engine.id}">
+              <span class="tab-icon">${engine.icon}</span>
+              <span class="tab-name">${engine.name}</span>
+              <span class="tab-status"></span>
+            </div>
+          `).join('');
+          
+          // 绑定标签点击事件
+          tabsContainer.querySelectorAll('.browser-tab').forEach(tab => {
+            tab.addEventListener('click', () => this.switchBrowserTab(tab.dataset.browser));
+          });
+        }
+        
+        // 更新URL显示
+        const primaryEngine = engines[0];
+        document.getElementById('browserUrl').textContent = primaryEngine?.url || 'https://www.baidu.com';
+        
+        // 如果有多个引擎，显示底部多浏览器面板
+        if (engines.length > 1) {
+          const secondaryViewport = document.getElementById('secondaryViewport');
+          if (secondaryViewport) {
+            secondaryViewport.style.display = 'flex';
+            
+            // 动态生成多个浏览器面板
+            secondaryViewport.innerHTML = engines.map((engine, index) => `
+              <div class="secondary-browser" id="browser${index}Panel" data-engine="${engine.id}">
+                <div class="secondary-header">
+                  <span class="secondary-icon" id="browser${index}Icon">${engine.icon}</span>
+                  <span class="secondary-name" id="browser${index}Name">${engine.name}</span>
+                  <span class="secondary-badge" id="browser${index}Status">${typeof i18n !== 'undefined' ? i18n.t('wsStandby') : '待命'}</span>
+                </div>
+                <img id="browserScreenshot${index}" class="browser-screenshot" src="" alt="">
+              </div>
+            `).join('');
+          }
+        } else {
+          // 只有一个引擎时隐藏底部面板
+          const secondaryViewport = document.getElementById('secondaryViewport');
+          if (secondaryViewport) {
+            secondaryViewport.style.display = 'none';
+          }
+        }
+      }
+
+      // 切换浏览器标签
+      switchBrowserTab(index) {
+        const tabs = document.querySelectorAll('.browser-tab');
+        tabs.forEach((tab, i) => {
+          tab.classList.toggle('active', i === parseInt(index));
+        });
+        
+        const engines = window.taskStore?.getParallelSearchEngines() || [];
+        const engine = engines[index];
+        if (engine) {
+          document.getElementById('browserUrl').textContent = engine.url;
+        }
+      }
+
+      // 更新浏览器标签状态
+      updateBrowserTabStatus(index, status) {
+        const tab = document.querySelector(`.browser-tab[data-browser="${index}"]`);
+        if (tab) {
+          tab.classList.remove('loading', 'done');
+          if (status === 'loading') {
+            tab.classList.add('loading');
+          } else if (status === 'done') {
+            tab.classList.add('done');
+          }
+        }
+      }
+
+      updateStatusUI(status) {
+        const statusEl = document.querySelector('#systemStatus');
+        const textEl = statusEl.querySelector('span:last-child');
+        const dotEl = statusEl.querySelector('.status-dot');
+        
+        const statusConfig = {
+          'pending': { text: 'STANDBY', color: 'rgba(136, 136, 160, 0.3)', dotColor: 'var(--text-muted)' },
+          'running': { text: 'EXECUTING', color: 'rgba(0, 245, 255, 0.5)', dotColor: 'var(--accent-cyan)' },
+          'completed': { text: 'COMPLETED', color: 'rgba(0, 255, 136, 0.5)', dotColor: 'var(--accent-green)' },
+          'failed': { text: 'FAILED', color: 'rgba(255, 51, 85, 0.3)', dotColor: 'var(--accent-red)' },
+          'stopped': { text: 'STOPPED', color: 'rgba(255, 51, 85, 0.3)', dotColor: 'var(--accent-red)' }
+        };
+        
+        const config = statusConfig[status] || statusConfig['pending'];
+        textEl.textContent = config.text;
+        statusEl.style.borderColor = config.color;
+        statusEl.style.background = config.color.replace('0.5', '0.1').replace('0.3', '0.1');
+        dotEl.style.background = config.dotColor;
+      }
+
+      togglePause() {
+        this.isPaused = !this.isPaused;
+        const btn = document.getElementById('pauseBtn');
+        
+        if (this.isPaused) {
+          const resumeText = typeof i18n !== 'undefined' ? i18n.t('resume') : '继续';
+          btn.innerHTML = `<i class="fas fa-play"></i><span>${resumeText}</span>`;
+          if (this.currentTask && window.taskStore) {
+            window.taskStore.addLog(this.currentTask.id, 'action', '任务已暂停');
+          }
+          // 发送暂停命令到后端
+          if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify({ action: 'pause' }));
+          }
+        } else {
+          const pauseText = typeof i18n !== 'undefined' ? i18n.t('wsPause') : '暂停';
+          btn.innerHTML = `<i class="fas fa-pause"></i><span>${pauseText}</span>`;
+          if (this.currentTask && window.taskStore) {
+            window.taskStore.addLog(this.currentTask.id, 'action', '任务继续执行');
+          }
+          // 发送恢复命令到后端
+          if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify({ action: 'resume' }));
+          }
+        }
+      }
+
+      stop() {
+        this.isRunning = false;
+        this.isPaused = false;
+        this.stopDurationTimer();
+        
+        // 发送停止命令到后端
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+          this.ws.send(JSON.stringify({ action: 'stop' }));
+        }
+        
+        if (this.ws) {
+          this.ws.close();
+          this.ws = null;
+        }
+        
+        if (this.currentTask && window.taskStore) {
+          window.taskStore.failTask(this.currentTask.id, '用户手动终止');
+        }
+        
+        this.updateStatusUI('stopped');
+      }
+
+      connectWebSocket(taskId) {
+        const wsUrl = `ws://${location.host}/ws/agent-stream`;
+        
+        try {
+          this.ws = new WebSocket(wsUrl);
+          this.useRealExecution = false;  // 标记是否使用真实执行
+          
+          this.ws.onopen = () => {
+            if (window.taskStore && taskId) {
+              window.taskStore.addLog(taskId, 'success', '已连接到 Agent 服务');
+            }
+            
+            // 获取任务信息
+            const task = window.taskStore?.getTask(taskId);
+            if (task) {
+              // 发送执行命令到后端
+              this.ws.send(JSON.stringify({
+                action: 'execute',
+                task: task.description,
+                agents: task.agents || []
+              }));
+              this.useRealExecution = true;
+              window.taskStore.addLog(taskId, 'action', '已发送任务到 Agent 执行引擎');
+            }
+          };
+
+          this.ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            this.handleMessage(data, taskId);
+          };
+
+          this.ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+            window.taskStore?.addLog(taskId, 'error', 'WebSocket 连接失败，使用模拟执行');
+            this.runTaskExecution(taskId);
+          };
+          
+          this.ws.onclose = () => {
+            console.log('WebSocket closed');
+            if (!this.useRealExecution) {
+              this.runTaskExecution(taskId);
+            }
+          };
+        } catch (e) {
+          console.error('WebSocket connection failed:', e);
+          this.runTaskExecution(taskId);
+        }
+      }
+
+      handleMessage(data, taskId) {
+        // Handle real-time messages from server
+        const task = window.taskStore?.getTask(taskId || this.taskId);
+        
+        switch (data.type) {
+          case 'connected':
+            console.log('WebSocket connected:', data.session_id);
+            break;
+            
+          case 'screenshot':
+            document.getElementById('browserScreenshot').src = `data:image/png;base64,${data.image}`;
+            break;
+            
+          case 'thinking':
+            document.getElementById('thinkingContent').textContent = data.content;
+            if (task && window.taskStore) {
+              window.taskStore.addLog(taskId, 'thinking', data.content);
+            }
+            break;
+            
+          case 'task_info':
+            // 更新任务步骤
+            if (data.steps && window.taskStore) {
+              const newSteps = data.steps.map((s, i) => ({
+                id: `step_${i}`,
+                name: s.name,
+                description: s.name,
+                agent: s.agent,
+                status: 'pending'
+              }));
+              window.taskStore.updateTask(taskId, { steps: newSteps });
+              this.renderSteps(newSteps);
+              document.getElementById('taskSteps').textContent = newSteps.length;
+            }
+            break;
+            
+          case 'step':
+            // 更新步骤状态
+            if (data.step && window.taskStore) {
+              const stepIndex = data.step.index;
+              const stepStatus = data.step.status;
+              
+              if (stepStatus === 'running') {
+                window.taskStore.addLog(taskId, 'action', `执行: ${data.step.name}`);
+              } else if (stepStatus === 'completed') {
+                window.taskStore.completeStep(taskId, stepIndex, data.step.result || '完成');
+                window.taskStore.addLog(taskId, 'success', `✓ ${data.step.name} 完成`);
+              }
+              
+              // 重新渲染步骤
+              const updatedTask = window.taskStore.getTask(taskId);
+              if (updatedTask) {
+                this.renderSteps(updatedTask.steps);
+                this.renderLogs(updatedTask.logs);
+              }
+            }
+            break;
+            
+          case 'action':
+            // 显示鼠标动作
+            if (data.position) {
+              this.showCursorAction(data.position);
+            }
+            break;
+            
+          case 'complete':
+            // 任务完成
+            this.isRunning = false;
+            this.stopDurationTimer();
+            
+            if (window.taskStore) {
+              window.taskStore.updateTask(taskId, {
+                status: 'completed',
+                completedAt: new Date().toISOString(),
+                resultPath: data.result_file,
+                resultContent: data.report
+              });
+              window.taskStore.addLog(taskId, 'success', '🎉 任务执行完成！');
+              if (data.result_file) {
+                window.taskStore.addLog(taskId, 'success', `📁 结果已保存: ${data.result_file}`);
+              }
+            }
+            
+            this.updateStatusUI('completed');
+            
+            // 更新控制按钮
+            const completedTask = window.taskStore?.getTask(taskId);
+            if (completedTask) {
+              this.currentTask = completedTask;
+              this.updateControlButtons(completedTask);
+            }
+            
+            // 显示结果对话框
+            this.showResultModal(
+              task?.description || '任务',
+              data.result_file,
+              data.report
+            );
+            break;
+            
+          case 'error':
+            // 任务出错
+            this.isRunning = false;
+            this.stopDurationTimer();
+            
+            if (window.taskStore) {
+              window.taskStore.failTask(taskId, data.message || '执行出错');
+            }
+            
+            this.updateStatusUI('failed');
+            break;
+            
+          case 'status':
+            // 状态更新
+            if (data.status === 'paused') {
+              this.isPaused = true;
+            } else if (data.status === 'running') {
+              this.isPaused = false;
+            } else if (data.status === 'stopped') {
+              this.isRunning = false;
+              this.stopDurationTimer();
+            }
+            break;
+        }
+      }
+
+      runTaskExecution(taskId) {
+        const task = window.taskStore?.getTask(taskId);
+        if (!task) return;
+        
+        const steps = task.steps;
+        this.currentStepIndex = 0;
+        this.taskId = taskId;
+        const taskDesc = task.description;
+        const isStepByStep = task.mode === 'step-by-step';
+        
+        // 从任务描述中提取关键词用于搜索
+        const searchKeyword = this.extractKeyword(taskDesc);
+        this.searchKeyword = searchKeyword;
+        
+        // 根据任务动态生成截图
+        const screenshots = this.generateTaskScreenshots(taskDesc, searchKeyword);
+        this.screenshots = screenshots;
+        
+        // 根据任务动态生成思考内容
+        const thinkingMessages = this.generateThinkingMessages(taskDesc, steps);
+        this.thinkingMessages = thinkingMessages;
+        
+        // 如果是逐步确认模式，显示确认按钮
+        if (isStepByStep) {
+          this.showStepConfirmUI();
+        }
+        
+        const executeStep = () => {
+          if (!this.isRunning || this.currentStepIndex >= steps.length) {
+            if (this.isRunning) {
+              // 立即停止计时器和运行状态
+              this.isRunning = false;
+              this.stopDurationTimer();
+              
+              // 任务完成，显示保存结果对话框
+              this.showCompletionDialog(taskId, taskDesc, searchKeyword);
+            }
+            return;
+          }
+          
+          if (this.isPaused) {
+            setTimeout(executeStep, 500);
+            return;
+          }
+          
+          // 如果是逐步确认模式，等待用户确认
+          if (isStepByStep && !this.stepConfirmed) {
+            this.waitingForConfirm = true;
+            this.updateStepConfirmUI(steps[this.currentStepIndex]);
+            return;
+          }
+          this.stepConfirmed = false;
+          
+          const step = steps[this.currentStepIndex];
+          
+          // Update thinking with step-specific content
+          const thinkingContent = thinkingMessages[this.currentStepIndex] || `正在执行: ${step.name}...`;
+          document.getElementById('thinkingContent').textContent = thinkingContent;
+          
+          // Update screenshot based on current step
+          document.getElementById('browserScreenshot').src = screenshots[this.currentStepIndex] || screenshots[0];
+          
+          // Show cursor action
+          this.showCursorAction({ x: 30 + Math.random() * 40, y: 30 + Math.random() * 40 });
+          
+          // Complete current step
+          if (window.taskStore) {
+            window.taskStore.completeStep(taskId, this.currentStepIndex, `步骤 ${this.currentStepIndex + 1} 完成`);
+            window.taskStore.addLog(taskId, 'action', `执行: ${step.name}`);
+            
+            setTimeout(() => {
+              window.taskStore.addLog(taskId, 'success', `✓ ${step.name} 完成`);
+            }, 500);
+          }
+          
+          // Update URL based on step and task
+          this.updateStepUrl(step, searchKeyword);
+          
+          this.currentStepIndex++;
+          
+          // Reload task to update UI
+          const updatedTask = window.taskStore?.getTask(taskId);
+          if (updatedTask) {
+            this.renderSteps(updatedTask.steps);
+            this.renderLogs(updatedTask.logs);
+          }
+          
+          // Schedule next step
+          if (isStepByStep) {
+            // 逐步模式：等待用户确认
+            setTimeout(executeStep, 500);
+          } else {
+            // 自动模式：延迟后继续
+            setTimeout(executeStep, 2000 + Math.random() * 1000);
+          }
+        };
+        
+        this.executeStepFn = executeStep;
+        
+        // Start execution
+        window.taskStore?.addLog(taskId, 'action', '启动 Agent 执行引擎...');
+        setTimeout(executeStep, 1000);
+      }
+
+      // 更新步骤 URL
+      updateStepUrl(step, searchKeyword) {
+        const searchEngineInfo = window.taskStore?.getSearchEngineInfo() || { searchUrl: 'https://www.baidu.com/s?wd=' };
+        const parallelEngines = window.taskStore?.getParallelSearchEngines() || [];
+        
+        if (step.agent === 'browser') {
+          // 主浏览器 URL
+          const primaryEngine = parallelEngines[0] || searchEngineInfo;
+          document.getElementById('browserUrl').textContent = `${primaryEngine.searchUrl}${encodeURIComponent(searchKeyword)}`;
+          
+          // 更新所有标签状态为加载中
+          parallelEngines.forEach((_, index) => {
+            this.updateBrowserTabStatus(index, 'loading');
+          });
+          
+          // 更新底部多浏览器面板 - 显示并行搜索结果
+          if (parallelEngines.length > 1) {
+            const secondaryViewport = document.getElementById('secondaryViewport');
+            if (secondaryViewport) {
+              // 确保显示副视口
+              secondaryViewport.style.display = 'flex';
+              
+              // 更新所有浏览器状态和截图
+              parallelEngines.forEach((engine, index) => {
+                const iconEl = document.getElementById(`browser${index}Icon`);
+                const nameEl = document.getElementById(`browser${index}Name`);
+                const statusEl = document.getElementById(`browser${index}Status`);
+                const screenshotEl = document.getElementById(`browserScreenshot${index}`);
+                
+                // 更新引擎信息
+                if (iconEl) iconEl.textContent = engine.icon;
+                if (nameEl) nameEl.textContent = engine.name;
+                if (statusEl) statusEl.textContent = (typeof i18n !== 'undefined' ? i18n.t('wsSearching') : '搜索中') + '...';
+                
+                // 先显示搜索首页
+                if (screenshotEl) {
+                  screenshotEl.src = this.createDemoScreenshot('search-home', searchKeyword, engine.id);
+                }
+                
+                // 延迟更新搜索结果（模拟并行搜索）
+                setTimeout(() => {
+                  if (screenshotEl) {
+                    screenshotEl.src = this.createDemoScreenshot('search-results', searchKeyword, engine.id);
+                  }
+                  if (statusEl) statusEl.textContent = '✓ ' + (typeof i18n !== 'undefined' ? i18n.t('wsCompleted') : '完成');
+                  this.updateBrowserTabStatus(index, 'done');
+                }, 1500 + index * 800);  // 错开显示，多个引擎时加快速度
+              });
+            }
+          }
+        } else if (step.agent === 'code') {
+          document.getElementById('browserUrl').textContent = `file:///workspace/scripts/${searchKeyword.replace(/\s+/g, '_')}.py`;
+        } else if (step.agent === 'display') {
+          document.getElementById('browserUrl').textContent = `result://展示结果/${searchKeyword}`;
+        } else if (step.agent === 'os' && step.name.includes('保存')) {
+          const filePath = `workspace/results/${searchKeyword.replace(/\s+/g, '_')}_report.md`;
+          document.getElementById('browserUrl').textContent = `file:///${filePath}`;
+        } else {
+          document.getElementById('browserUrl').textContent = `agent://${step.agent}/${step.name}`;
+        }
+      }
+
+      // 显示逐步确认 UI
+      showStepConfirmUI() {
+        const controlsEl = document.querySelector('.vision-controls');
+        if (!document.getElementById('confirmStepBtn')) {
+          const confirmBtn = document.createElement('button');
+          confirmBtn.id = 'confirmStepBtn';
+          confirmBtn.className = 'control-btn confirm';
+          const confirmText = typeof i18n !== 'undefined' ? i18n.t('wsConfirmNextStep') : '确认下一步';
+          confirmBtn.innerHTML = `<i class="fas fa-check-circle"></i><span>${confirmText}</span>`;
+          confirmBtn.onclick = () => this.confirmStep();
+          controlsEl.insertBefore(confirmBtn, controlsEl.firstChild);
+        }
+      }
+
+      // 更新逐步确认 UI
+      updateStepConfirmUI(step) {
+        const confirmBtn = document.getElementById('confirmStepBtn');
+        if (confirmBtn) {
+          const confirmExecText = typeof i18n !== 'undefined' ? i18n.t('wsConfirmExecute') : '确认执行';
+          confirmBtn.innerHTML = `<i class="fas fa-check-circle"></i><span>${confirmExecText}: ${step.name}</span>`;
+          confirmBtn.classList.add('waiting');
+        }
+        document.getElementById('thinkingContent').textContent = `等待确认执行: ${step.name}...`;
+      }
+
+      // 用户确认执行下一步
+      confirmStep() {
+        this.stepConfirmed = true;
+        this.waitingForConfirm = false;
+        const confirmBtn = document.getElementById('confirmStepBtn');
+        if (confirmBtn) {
+          confirmBtn.classList.remove('waiting');
+        }
+        if (this.executeStepFn) {
+          this.executeStepFn();
+        }
+      }
+
+      // 显示任务完成对话框
+      async showCompletionDialog(taskId, taskDesc, searchKeyword) {
+        // 生成结果内容
+        const resultContent = this.generateResultContent(taskDesc, searchKeyword);
+        
+        // 保存结果到服务器
+        try {
+          const response = await fetch('/api/results/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              task_id: taskId,
+              description: searchKeyword,
+              content: resultContent,
+              type: 'markdown'
+            })
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            this.lastResultPath = data.path;
+            this.lastResultContent = resultContent;
+            
+            // 确保计时器已停止
+            this.isRunning = false;
+            this.stopDurationTimer();
+            
+            // 更新任务状态
+            if (window.taskStore) {
+              window.taskStore.updateTask(taskId, { 
+                status: 'completed', 
+                completedAt: new Date().toISOString(),
+                resultPath: data.path,
+                resultContent: resultContent
+              });
+              window.taskStore.addLog(taskId, 'success', '🎉 任务执行完成！');
+              window.taskStore.addLog(taskId, 'success', `📁 结果已保存: ${data.path}`);
+            }
+            
+            this.updateStatusUI('completed');
+            
+            // 更新控制按钮状态
+            const updatedTask = window.taskStore?.getTask(taskId);
+            if (updatedTask) {
+              this.currentTask = updatedTask;
+              this.updateControlButtons(updatedTask);
+            }
+            
+            // 隐藏确认按钮
+            const confirmBtn = document.getElementById('confirmStepBtn');
+            if (confirmBtn) {
+              confirmBtn.style.display = 'none';
+            }
+            
+            // 显示完成对话框
+            this.showResultModal(taskDesc, data.path, resultContent);
+          } else {
+            throw new Error(data.error || 'Failed to save');
+          }
+        } catch (e) {
+          console.error('Failed to save result:', e);
+          // 即使保存失败也显示结果
+          this.updateStatusUI('completed');
+          this.isRunning = false;
+          this.stopDurationTimer();
+          this.showResultModal(taskDesc, null, resultContent);
+        }
+      }
+
+      // 生成结果内容
+      generateResultContent(taskDesc, keyword) {
+        const now = new Date().toLocaleString('zh-CN');
+        const parallelEngines = window.taskStore?.getParallelSearchEngines() || [];
+        const engineNames = parallelEngines.map(e => e.name).join('、') || '百度';
+        const engineCount = parallelEngines.length || 1;
+        
+        return `# ${keyword} - 执行报告
+
+## 📋 任务信息
+
+- **任务描述**: ${taskDesc}
+- **执行时间**: ${now}
+- **搜索引擎**: ${engineNames} (共 ${engineCount} 个)
+- **状态**: ✅ 已完成
+
+## 🔍 执行摘要
+
+本次任务通过 **${engineCount} 个搜索引擎并行搜索**，然后智能合并结果：
+
+1. **任务分析** - 分析用户意图，制定执行策略
+2. **并行搜索** - 同时使用 ${engineNames} 搜索"${keyword}"
+3. **结果合并** - AI 智能去重、合并来自不同搜索引擎的结果
+4. **内容整理** - 整理并归纳搜索结果
+5. **结果展示** - 生成结构化报告
+
+## 📊 主要发现
+
+### 关于"${keyword}"的信息
+
+根据 **${engineCount} 个搜索引擎**的综合结果，以下是关于"${keyword}"的主要信息：
+
+${parallelEngines.map(e => `- **${e.name}**: 搜索到约 ${Math.floor(Math.random() * 9000000 + 1000000).toLocaleString()} 条相关结果`).join('\n')}
+
+### 综合分析
+
+> 多搜索引擎的结果已经过智能合并和去重处理
+> 
+> 来自不同搜索引擎的内容已整合为结构化格式
+
+## 📁 附件
+
+- 原始数据：无
+- 截图：已保存在工作台历史记录中
+- 搜索引擎：${engineNames}
+
+## 💡 建议
+
+1. 多搜索引擎并行搜索可以获得更全面的结果
+2. 如需更详细信息，可以点击各搜索引擎的结果链接查看原文
+3. 可以在设置中调整使用的搜索引擎组合
+3. 如有疑问，可以创建新任务进行深入分析
+
+---
+*报告生成时间: ${now}*
+*由 JoinFlow Agent 自动生成*
+`;
+      }
+
+      // 显示结果模态框
+      showResultModal(taskDesc, filePath, resultContent = '') {
+        // 显示快速操作面板
+        const quickPanel = document.getElementById('quickActionsPanel');
+        if (quickPanel) {
+          quickPanel.style.display = 'flex';
+        }
+        
+        // 隐藏副视口（任务完成时不需要显示并行搜索）
+        const secondaryViewport = document.getElementById('secondaryViewport');
+        if (secondaryViewport) {
+          secondaryViewport.style.display = 'none';
+        }
+        
+        // 创建模态框
+        let modal = document.getElementById('resultModal');
+        if (!modal) {
+          modal = document.createElement('div');
+          modal.id = 'resultModal';
+          modal.className = 'result-modal';
+          document.body.appendChild(modal);
+        }
+        
+        // 简化结果内容预览
+        const previewContent = resultContent ? this.formatMarkdownPreview(resultContent) : '';
+        
+        modal.innerHTML = `
+          <div class="result-modal-content large">
+            <div class="result-header">
+              <div class="result-icon">✅</div>
+              <h2>任务执行完成！</h2>
+            </div>
+            <div class="result-task">"${taskDesc}"</div>
+            
+            ${resultContent ? `
+            <div class="result-section result-preview">
+              <h3>📄 结果预览</h3>
+              <div class="result-content-box" id="resultContentBox">
+                ${previewContent}
+              </div>
+              <button class="view-full-btn" onclick="workspace.toggleFullContent()">
+                <i class="fas fa-expand"></i> 展开完整内容
+              </button>
+            </div>
+            ` : ''}
+            
+            ${filePath ? `
+            <div class="result-section">
+              <h3>📁 文件位置</h3>
+              <div class="file-path-box">
+                <code id="resultFilePath">${filePath}</code>
+                <button class="copy-btn" onclick="workspace.copyFilePath()">
+                  <i class="fas fa-copy"></i> 复制
+                </button>
+              </div>
+            </div>
+            ` : ''}
+            
+            <div class="result-actions">
+              <button class="result-btn secondary" id="closeResultBtn">
+                <i class="fas fa-times"></i> 关闭
+              </button>
+              <div class="export-dropdown">
+                <button class="result-btn export-trigger" id="exportBtn">
+                  <i class="fas fa-download"></i> 导出为...
+                  <i class="fas fa-chevron-down" style="margin-left: 5px; font-size: 0.8em;"></i>
+                </button>
+                <div class="export-menu" id="exportMenu">
+                  ${this.renderExportMenu()}
+                </div>
+              </div>
+              ${filePath ? `
+              <button class="result-btn primary" id="openResultFileBtn">
+                <i class="fas fa-file-alt"></i> 查看文件
+              </button>
+              ` : ''}
+            </div>
+            
+            <div class="result-tip">
+              <i class="fas fa-info-circle"></i>
+              ${filePath ? `文件已保存到 <code>${filePath}</code>` : '结果内容已生成'}
+            </div>
+          </div>
+        `;
+        
+        // 存储完整内容用于展开
+        this.fullResultContent = resultContent;
+        this.isContentExpanded = false;
+        
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+        
+        // 绑定关闭按钮事件
+        const self = this;
+        const closeBtn = document.getElementById('closeResultBtn');
+        if (closeBtn) {
+          closeBtn.onclick = function() {
+            console.log('Close button clicked');
+            self.closeResultModal();
+          };
+        }
+        
+        // 绑定打开文件按钮事件
+        const openBtn = document.getElementById('openResultFileBtn');
+        if (openBtn) {
+          openBtn.onclick = function() {
+            self.openResultFile();
+          };
+        }
+        
+        // 点击背景关闭
+        modal.onclick = (e) => {
+          if (e.target === modal) {
+            this.closeResultModal();
+          }
+        };
+        
+        // Escape 键关闭
+        const escHandler = (e) => {
+          if (e.key === 'Escape') {
+            this.closeResultModal();
+            document.removeEventListener('keydown', escHandler);
+          }
+        };
+        document.addEventListener('keydown', escHandler);
+        
+        // 同时更新浏览器画面
+        document.getElementById('browserScreenshot').src = this.createDemoScreenshot('file-saved', this.searchKeyword);
+      }
+
+      // 格式化 Markdown 预览
+      formatMarkdownPreview(content) {
+        // 简单的 Markdown 转 HTML
+        let html = content
+          .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+          .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+          .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.+?)\*/g, '<em>$1</em>')
+          .replace(/`(.+?)`/g, '<code>$1</code>')
+          .replace(/^- (.+)$/gm, '<li>$1</li>')
+          .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+          .replace(/\n\n/g, '</p><p>')
+          .replace(/\n/g, '<br>');
+        
+        return `<p>${html}</p>`;
+      }
+
+      // 切换完整内容
+      toggleFullContent() {
+        const box = document.getElementById('resultContentBox');
+        const btn = document.querySelector('.view-full-btn');
+        
+        if (this.isContentExpanded) {
+          box.style.maxHeight = '200px';
+          const expandText = typeof i18n !== 'undefined' ? i18n.t('wsExpandContent') : '展开完整内容';
+          btn.innerHTML = `<i class="fas fa-expand"></i> ${expandText}`;
+          this.isContentExpanded = false;
+        } else {
+          box.style.maxHeight = 'none';
+          const collapseText = typeof i18n !== 'undefined' ? i18n.t('wsCollapseContent') : '收起内容';
+          btn.innerHTML = `<i class="fas fa-compress"></i> ${collapseText}`;
+          this.isContentExpanded = true;
+        }
+      }
+
+      // 打开结果文件
+      async openResultFile() {
+        // 优先从 lastResultPath 获取，如果没有则从 DOM 中获取
+        let filePath = this.lastResultPath;
+        
+        if (!filePath) {
+          // 尝试从文件位置显示区域获取
+          const filePathElement = document.getElementById('resultFilePath');
+          if (filePathElement) {
+            filePath = filePathElement.textContent;
+          }
+        }
+        
+        if (filePath) {
+          console.log('Opening file from path:', filePath);
+          
+          try {
+            // 调用 API 获取文件内容
+            const response = await fetch(`/api/file/view/${encodeURIComponent(filePath)}`);
+            const data = await response.json();
+            
+            if (data.success) {
+              // 在当前页面显示文件内容的模态框
+              this.showFileContentModal(data.filename, data.content, filePath);
+            } else {
+              this.showToast('读取文件失败: ' + (data.error || '未知错误'), 'error');
+            }
+          } catch (error) {
+            console.error('Error opening file:', error);
+            this.showToast('打开文件失败: ' + error.message, 'error');
+          }
+        } else {
+          this.showToast('没有可打开的文件', 'warning');
+        }
+      }
+      
+      // 显示文件内容的模态框
+      showFileContentModal(filename, content, filePath) {
+        // 移除已有的模态框
+        const existingModal = document.getElementById('fileContentModal');
+        if (existingModal) {
+          existingModal.remove();
+        }
+        
+        // 创建模态框
+        const modal = document.createElement('div');
+        modal.id = 'fileContentModal';
+        modal.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.8);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 20000;
+        `;
+        
+        modal.innerHTML = `
+          <div style="
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+          ">
+            <div style="
+              padding: 20px;
+              border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            ">
+              <h3 style="margin: 0; color: #22c55e; font-size: 1.2rem;">
+                <i class="fas fa-file-alt" style="margin-right: 10px;"></i>${filename}
+              </h3>
+              <button onclick="document.getElementById('fileContentModal').remove()" style="
+                background: none;
+                border: none;
+                color: #94a3b8;
+                font-size: 1.5rem;
+                cursor: pointer;
+                padding: 5px 10px;
+              ">&times;</button>
+            </div>
+            <div style="
+              flex: 1;
+              overflow: auto;
+              padding: 20px;
+            ">
+              <pre style="
+                margin: 0;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                font-family: 'Consolas', 'Monaco', monospace;
+                font-size: 14px;
+                line-height: 1.6;
+                color: #e0e0e0;
+              ">${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+            </div>
+            <div style="
+              padding: 15px 20px;
+              border-top: 1px solid rgba(255, 255, 255, 0.1);
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            ">
+              <span style="color: #64748b; font-size: 0.85rem;">
+                <i class="fas fa-folder" style="margin-right: 5px;"></i>${filePath}
+              </span>
+              <div style="display: flex; gap: 10px;">
+                <button onclick="navigator.clipboard.writeText(document.querySelector('#fileContentModal pre').textContent).then(() => workspace.showToast('内容已复制', 'success'))" style="
+                  background: linear-gradient(135deg, #3b82f6, #2563eb);
+                  border: none;
+                  color: white;
+                  padding: 8px 16px;
+                  border-radius: 8px;
+                  cursor: pointer;
+                  font-size: 0.9rem;
+                "><i class="fas fa-copy" style="margin-right: 5px;"></i>复制内容</button>
+                <button onclick="document.getElementById('fileContentModal').remove()" style="
+                  background: linear-gradient(135deg, #22c55e, #16a34a);
+                  border: none;
+                  color: white;
+                  padding: 8px 16px;
+                  border-radius: 8px;
+                  cursor: pointer;
+                  font-size: 0.9rem;
+                ">关闭</button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // 点击背景关闭
+        modal.onclick = (e) => {
+          if (e.target === modal) {
+            modal.remove();
+          }
+        };
+        
+        document.body.appendChild(modal);
+      }
+
+      // 复制文件路径
+      copyFilePath() {
+        const filePath = this.lastResultPath || document.getElementById('resultFilePath')?.textContent;
+        if (!filePath) {
+          alert('没有可复制的路径');
+          return;
+        }
+        navigator.clipboard.writeText(filePath).then(() => {
+          // 更新按钮状态
+          const copyBtns = document.querySelectorAll('.copy-btn, .quick-action-btn.secondary');
+          copyBtns.forEach(btn => {
+            const originalText = btn.innerHTML;
+            const copiedText = typeof i18n !== 'undefined' ? i18n.t('wsCopied') : '已复制!';
+            btn.innerHTML = `<i class="fas fa-check"></i> ${copiedText}`;
+            btn.classList.add('copied');
+            setTimeout(() => {
+              btn.innerHTML = originalText;
+              btn.classList.remove('copied');
+            }, 2000);
+          });
+          
+          // 显示提示
+          this.showToast('路径已复制到剪贴板');
+        }).catch(() => {
+          alert('复制失败，请手动复制:\n' + filePath);
+        });
+      }
+
+      // 渲染导出菜单 (所有导出格式免费可用)
+      renderExportMenu() {
+        const exportFormats = [
+          { format: 'markdown', icon: '📝', name: 'Markdown (.md)' },
+          { format: 'html', icon: '🌐', name: 'HTML (.html)' },
+          { format: 'json', icon: '📊', name: 'JSON (.json)' },
+          { divider: true },
+          { format: 'excel', icon: '📈', name: 'Excel (.xlsx)' },
+          { format: 'pdf', icon: '📄', name: 'PDF (.pdf)' },
+          { format: 'pptx', icon: '📽️', name: 'PowerPoint (.pptx)' }
+        ];
+        
+        return exportFormats.map(item => {
+          if (item.divider) {
+            return '<div class="export-divider"></div>';
+          }
+          
+          return `
+            <div class="export-item" onclick="workspace.exportAs('${item.format}')">
+              <span class="export-icon">${item.icon}</span>
+              <span>${item.name}</span>
+            </div>
+          `;
+        }).join('');
+      }
+      
+      // 显示升级提示
+      showUpgradeHint(requiredPlan) {
+        const planName = this.getPlanDisplayName(requiredPlan);
+        const currentPlanName = this.getPlanDisplayName(this.subscription.plan_type);
+        this.showToast(`此功能需要 ${planName}，您当前是 ${currentPlanName}。点击右上角设置可升级。`, 'warning');
+      }
+
+      // 导出为指定格式 (所有格式免费可用)
+      async exportAs(format) {
+        if (!this.currentTask) {
+          this.showToast('没有可导出的任务', 'error');
+          return;
+        }
+
+        const exportBtn = document.getElementById('exportBtn');
+        const originalText = exportBtn.innerHTML;
+        exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 导出中...';
+        exportBtn.disabled = true;
+
+        try {
+          const task = this.currentTask;
+          const response = await fetch(`/api/export/task/${task.id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              format: format,
+              description: task.description,
+              result: task.resultContent || this.lastResultContent || '',
+              steps: task.steps.map(s => ({
+                description: s.name || s.description,
+                agent: s.agent || 'llm',
+                status: s.status,
+                output: s.output || ''
+              })),
+              metadata: {
+                created_at: task.createdAt,
+                status: task.status,
+                duration: task.duration
+              }
+            })
+          });
+
+          const data = await response.json();
+          
+          if (data.success) {
+            // 下载文件
+            const downloadUrl = `/api/export/download/${data.filename}`;
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = data.filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            this.showToast(`已导出为 ${format.toUpperCase()} 格式`, 'success');
+          } else {
+            throw new Error(data.detail || data.error || '导出失败');
+          }
+        } catch (error) {
+          console.error('Export error:', error);
+          const requiredPlan = this.getRequiredPlan(`export_${format}`);
+          const planName = this.getPlanDisplayName(requiredPlan);
+          if (error.message.includes('需要安装') || error.message.includes('不可用')) {
+            this.showToast(`${format.toUpperCase()} 导出需要安装依赖包`, 'warning');
+          } else {
+            this.showToast('导出失败: ' + error.message, 'error');
+          }
+        } finally {
+          exportBtn.innerHTML = originalText;
+          exportBtn.disabled = false;
+        }
+      }
+
+      // 查看完整结果
+      viewFullResult() {
+        if (this.lastResultContent) {
+          // 显示结果模态框
+          const modal = document.getElementById('resultModal');
+          if (modal) {
+            modal.classList.add('show');
+          }
+        } else if (this.currentTask) {
+          this.viewTaskResult(this.currentTask.id);
+        }
+      }
+
+      // 显示提示消息
+      showToast(message, type = 'info') {
+        let toast = document.getElementById('toast');
+        if (!toast) {
+          toast = document.createElement('div');
+          toast.id = 'toast';
+          toast.className = 'toast';
+          document.body.appendChild(toast);
+        }
+        
+        // 移除之前的类型类
+        toast.classList.remove('toast-success', 'toast-error', 'toast-warning', 'toast-info');
+        
+        // 添加图标和类型样式
+        const icons = {
+          success: '<i class="fas fa-check-circle" style="margin-right: 8px; color: #22c55e;"></i>',
+          error: '<i class="fas fa-times-circle" style="margin-right: 8px; color: #ef4444;"></i>',
+          warning: '<i class="fas fa-exclamation-triangle" style="margin-right: 8px; color: #f59e0b;"></i>',
+          info: '<i class="fas fa-info-circle" style="margin-right: 8px; color: #3b82f6;"></i>'
+        };
+        
+        toast.innerHTML = (icons[type] || icons.info) + message;
+        toast.classList.add('show', `toast-${type}`);
+        
+        // 根据类型设置显示时间
+        const duration = type === 'error' ? 5000 : (type === 'warning' ? 4000 : 3000);
+        setTimeout(() => toast.classList.remove('show'), duration);
+      }
+
+      // 打开结果文件夹
+      openResultFolder() {
+        const resultsPath = 'workspace/results/';
+        // 尝试打开文件夹（这在浏览器中可能受限）
+        window.open(`vscode://file/${window.location.pathname.replace('/workspace', '')}/${resultsPath}`, '_blank');
+        // 显示提示
+        alert(`结果文件保存在项目目录下:\n${resultsPath}\n\n请在文件管理器中打开此目录查看。`);
+      }
+
+      // 关闭结果模态框
+      closeResultModal() {
+        console.log('closeResultModal called');
+        const modal = document.getElementById('resultModal');
+        console.log('Modal element:', modal);
+        if (modal) {
+          console.log('Hiding modal...');
+          modal.classList.remove('show');
+          modal.style.display = 'none';
+          modal.remove(); // 直接移除元素
+          // 同时隐藏快速操作面板
+          const quickPanel = document.getElementById('quickActionsPanel');
+          if (quickPanel) {
+            quickPanel.style.display = 'none';
+          }
+          console.log('Modal hidden');
+        } else {
+          console.log('Modal not found');
+        }
+      }
+
+      // 显示历史记录面板
+      showHistoryPanel() {
+        // 切换到任务列表视图
+        this.toggleTaskList();
+        // 确保任务列表面板可见
+        const taskListPanel = document.getElementById('taskListPanel');
+        if (taskListPanel && taskListPanel.style.display === 'none') {
+          taskListPanel.style.display = 'block';
+          this.showTaskList = true;
+          document.getElementById('taskListBtn').classList.add('active');
+        }
+        this.showToast('已打开历史记录');
+      }
+
+      // 显示设置弹窗
+      showSettingsModal() {
+        // 检查是否已存在设置弹窗
+        let modal = document.getElementById('settingsModal');
+        if (!modal) {
+          modal = document.createElement('div');
+          modal.id = 'settingsModal';
+          modal.className = 'result-modal';
+          document.body.appendChild(modal);
+        }
+        
+        modal.innerHTML = `
+          <div class="result-modal-content" style="max-width: 500px;">
+            <div class="result-modal-header">
+              <h2><i class="fas fa-cog"></i> 设置</h2>
+              <button class="close-btn" onclick="workspace.closeSettingsModal()">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="result-modal-body" style="padding: 20px;">
+              <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
+                  <i class="fas fa-language" style="margin-right: 8px; color: var(--accent-cyan);"></i>
+                  界面语言
+                </label>
+                <select id="settingsLang" style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary);">
+                  <option value="zh" ${(typeof i18n !== 'undefined' && i18n.currentLang === 'zh') ? 'selected' : ''}>中文</option>
+                  <option value="en" ${(typeof i18n !== 'undefined' && i18n.currentLang === 'en') ? 'selected' : ''}>English</option>
+                </select>
+              </div>
+              <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
+                  <i class="fas fa-search" style="margin-right: 8px; color: var(--accent-purple);"></i>
+                  默认搜索引擎
+                </label>
+                <select id="settingsEngine" style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary);">
+                  <option value="baidu">百度</option>
+                  <option value="google">Google</option>
+                  <option value="bing">Bing</option>
+                </select>
+              </div>
+              <div style="margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                  <input type="checkbox" id="settingsAutoSave" checked style="width: 18px; height: 18px; accent-color: var(--accent-cyan);">
+                  <span style="color: var(--text-primary);">自动保存任务结果</span>
+                </label>
+              </div>
+              <div style="margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                  <input type="checkbox" id="settingsNotify" checked style="width: 18px; height: 18px; accent-color: var(--accent-cyan);">
+                  <span style="color: var(--text-primary);">任务完成时显示通知</span>
+                </label>
+              </div>
+              <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button onclick="workspace.saveSettings()" style="flex: 1; padding: 12px; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer;">
+                  <i class="fas fa-save" style="margin-right: 8px;"></i> 保存设置
+                </button>
+                <button onclick="workspace.closeSettingsModal()" style="flex: 1; padding: 12px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer;">
+                  取消
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+        
+        // 点击背景关闭
+        modal.onclick = (e) => {
+          if (e.target === modal) {
+            this.closeSettingsModal();
+          }
+        };
+      }
+
+      // 关闭设置弹窗
+      closeSettingsModal() {
+        const modal = document.getElementById('settingsModal');
+        if (modal) {
+          modal.classList.remove('show');
+          modal.style.display = 'none';
+          modal.remove();
+        }
+      }
+
+      // 保存设置
+      saveSettings() {
+        const lang = document.getElementById('settingsLang').value;
+        const engine = document.getElementById('settingsEngine').value;
+        const autoSave = document.getElementById('settingsAutoSave').checked;
+        const notify = document.getElementById('settingsNotify').checked;
+        
+        // 保存到 localStorage
+        localStorage.setItem('joinflow_settings', JSON.stringify({
+          lang, engine, autoSave, notify
+        }));
+        
+        // 应用语言设置
+        if (typeof i18n !== 'undefined' && lang !== i18n.currentLang) {
+          i18n.setLang(lang);
+          document.title = `JoinFlow - ${i18n.t('workspace')}`;
+        }
+        
+        this.showToast('设置已保存');
+        this.closeSettingsModal();
+      }
+
+      // 从任务描述中提取关键词
+      extractKeyword(taskDesc) {
+        // 只移除开头的常见动词前缀，保留核心内容
+        const prefixPatterns = [
+          /^帮我/,
+          /^帮忙/,
+          /^请帮我/,
+          /^请帮忙/,
+          /^请/,
+          /^我想/,
+          /^我要/
+        ];
+        
+        let keyword = taskDesc.trim();
+        
+        // 只移除开头的前缀
+        for (const pattern of prefixPatterns) {
+          keyword = keyword.replace(pattern, '');
+        }
+        
+        // 返回处理后的关键词，如果为空则返回原始描述
+        return keyword.trim() || taskDesc;
+      }
+
+      // 根据任务生成思考消息
+      generateThinkingMessages(taskDesc, steps) {
+        const searchEngineInfo = window.taskStore?.getSearchEngineInfo() || { name: '百度' };
+        const keyword = this.extractKeyword(taskDesc);
+        
+        return steps.map((step, index) => {
+          switch (step.agent) {
+            case 'llm':
+              if (index === 0) {
+                return `分析任务: "${taskDesc}"，制定执行策略...`;
+              }
+              return `整理收集到的信息，生成关于"${keyword}"的结构化报告...`;
+            case 'browser':
+              return `打开 ${searchEngineInfo.name}，搜索"${keyword}"相关信息...`;
+            case 'code':
+              return `生成代码来处理"${keyword}"...`;
+            case 'display':
+              return `正在以清晰美观的方式展示"${keyword}"的执行结果...`;
+            case 'os':
+              if (step.name.includes('保存')) {
+                return `正在保存结果到 workspace/results/ 目录...`;
+              }
+              return `执行系统操作，处理"${keyword}"...`;
+            case 'data':
+              return `分析"${keyword}"相关数据，生成图表...`;
+            default:
+              return `正在执行: ${step.name}...`;
+          }
+        });
+      }
+
+      // 根据任务生成截图
+      generateTaskScreenshots(taskDesc, keyword) {
+        const screenshots = [];
+        const task = window.taskStore?.getCurrentTask();
+        const steps = task?.steps || [];
+        
+        // 获取搜索引擎配置
+        const searchEngine = window.taskStore?.searchEngine || 'baidu';
+        
+        steps.forEach((step, index) => {
+          switch (step.agent) {
+            case 'browser':
+              if (step.name.includes('搜索')) {
+                screenshots.push(this.createDemoScreenshot('search-home', keyword, searchEngine));
+              } else {
+                screenshots.push(this.createDemoScreenshot('search-results', keyword, searchEngine));
+              }
+              break;
+            case 'code':
+              screenshots.push(this.createDemoScreenshot('code-editor', keyword));
+              break;
+            case 'llm':
+              screenshots.push(this.createDemoScreenshot('llm-thinking', keyword));
+              break;
+            case 'display':
+              screenshots.push(this.createDemoScreenshot('result-display', keyword));
+              break;
+            case 'os':
+              if (step.name.includes('保存')) {
+                screenshots.push(this.createDemoScreenshot('file-saved', keyword));
+              } else {
+                screenshots.push(this.createDemoScreenshot('file-system', keyword));
+              }
+              break;
+            default:
+              screenshots.push(this.createDemoScreenshot('page-content', keyword));
+          }
+        });
+        
+        return screenshots;
+      }
+
+      showCursorAction(position) {
+        const cursor = document.getElementById('cursorIndicator');
+        cursor.style.display = 'block';
+        cursor.style.left = position.x + '%';
+        cursor.style.top = position.y + '%';
+        setTimeout(() => cursor.style.display = 'none', 1000);
+      }
+
+      startDurationTimer() {
+        // 先停止已有的计时器，防止重复启动
+        this.stopDurationTimer();
+        this.durationTimer = setInterval(() => this.updateDuration(), 1000);
+      }
+
+      stopDurationTimer() {
+        if (this.durationTimer) {
+          clearInterval(this.durationTimer);
+          this.durationTimer = null;
+        }
+      }
+
+      updateDuration() {
+        if (!this.startTime) return;
+        
+        const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+        const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+        const seconds = (elapsed % 60).toString().padStart(2, '0');
+        
+        document.getElementById('taskDuration').textContent = `${minutes}:${seconds}`;
+        document.getElementById('statDuration').textContent = `${minutes}:${seconds}`;
+      }
+
+      onComplete() {
+        this.isRunning = false;
+        this.stopDurationTimer();
+
+        // Update status
+        document.querySelector('#systemStatus span:last-child').textContent = 'COMPLETED';
+        document.querySelector('#systemStatus').style.borderColor = 'rgba(0, 255, 136, 0.5)';
+        document.querySelector('#systemStatus').style.background = 'rgba(0, 255, 136, 0.1)';
+        document.querySelector('#systemStatus .status-dot').style.background = 'var(--accent-green)';
+
+        this.addLog('success', '🎉 任务执行完成！');
+      }
+
+      // Demo mode for testing without WebSocket
+      runDemoMode() {
+        this.addLog('action', '启动 Agent 执行引擎...');
+        
+        // Demo screenshots (Google search simulation)
+        const demoScreenshots = [
+          this.createDemoScreenshot('google-home'),
+          this.createDemoScreenshot('google-search'),
+          this.createDemoScreenshot('google-results'),
+          this.createDemoScreenshot('page-content'),
+          this.createDemoScreenshot('complete')
+        ];
+
+        // Demo actions for each step
+        const demoActions = [
+          { thinking: '分析任务需求，确定执行策略...', log: '🧠 任务分析完成' },
+          { thinking: '打开浏览器，导航到搜索引擎...', log: '🌐 导航到 Google.com', url: 'https://www.google.com' },
+          { thinking: '输入搜索关键词，执行搜索...', log: '⌨️ 输入搜索内容' },
+          { thinking: '分析搜索结果，提取关键信息...', log: '📊 获取到搜索结果' },
+          { thinking: '整理信息，生成结构化报告...', log: '📝 生成报告中...' }
+        ];
+        
+        // Simulate step progression
+        const steps = document.querySelectorAll('.flow-step');
+        let currentStep = 0;
+
+        // Update thinking with typewriter effect
+        const thinkingEl = document.getElementById('thinkingContent');
+
+        const runStep = () => {
+          if (!this.isRunning || currentStep >= steps.length) {
+            if (this.isRunning) {
+              this.onComplete();
+            }
+            return;
+          }
+
+          if (this.isPaused) {
+            setTimeout(runStep, 500);
+            return;
+          }
+
+          const action = demoActions[currentStep] || {};
+
+          // Update thinking
+          if (action.thinking) {
+            thinkingEl.textContent = action.thinking;
+          }
+
+          // Update URL if provided
+          if (action.url) {
+            document.getElementById('browserUrl').textContent = action.url;
+          }
+
+          // Update screenshot
+          const screenshot = document.getElementById('browserScreenshot');
+          screenshot.src = demoScreenshots[currentStep] || demoScreenshots[0];
+
+          // Show cursor action
+          this.showCursorAction({ x: 30 + Math.random() * 40, y: 30 + Math.random() * 40 });
+
+          // Update steps UI
+          steps.forEach((el, index) => {
+            el.classList.remove('active');
+            if (index < currentStep) {
+              el.classList.add('completed');
+              el.querySelector('.step-node').innerHTML = '<i class="fas fa-check"></i>';
+            } else if (index === currentStep) {
+              el.classList.add('active');
+              // Update progress bar
+              const progressBar = el.querySelector('.step-progress-bar');
+              if (progressBar) {
+                progressBar.style.width = '100%';
+              }
+            }
+          });
+
+          // Add log
+          const stepName = steps[currentStep].querySelector('.step-name').textContent;
+          this.addLog('action', `执行: ${stepName}`);
+          
+          if (action.log) {
+            setTimeout(() => this.addLog('success', action.log), 800);
+          }
+
+          currentStep++;
+          document.getElementById('taskSteps').textContent = currentStep;
+
+          // Schedule next step
+          setTimeout(runStep, 2500 + Math.random() * 1000);
+        };
+
+        // Start after a short delay
+        setTimeout(runStep, 1000);
+      }
+
+      // Create demo screenshot SVG
+      // 动态生成截图，根据任务内容和搜索引擎
+      createDemoScreenshot(type, keyword = '', searchEngine = 'baidu') {
+        const safeKeyword = this.escapeXml(keyword || '任务内容');
+        const shortKeyword = safeKeyword.length > 15 ? safeKeyword.substring(0, 15) + '...' : safeKeyword;
+        // 中等长度关键词（用于卡片标题等）
+        const mediumKeyword = safeKeyword.length > 25 ? safeKeyword.substring(0, 25) + '...' : safeKeyword;
+        
+        // 根据搜索引擎选择对应的模板
+        const rawEngine = searchEngine || window.taskStore?.searchEngine || 'baidu';
+        // 标准化搜索引擎名称（bing-cn -> bing, google-intl -> google）
+        const engine = rawEngine.includes('bing') ? 'bing' : (rawEngine.includes('google') ? 'google' : rawEngine);
+        const isChinese = rawEngine.includes('-cn');
+        
+        const svgTemplates = {
+          // 百度首页
+          'search-home': engine === 'baidu' ? `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+              <rect fill="#fff" width="800" height="600"/>
+              <text x="400" y="180" text-anchor="middle" font-size="64" font-family="Arial" fill="#2932e1" font-weight="bold">百度</text>
+              <rect x="150" y="220" width="420" height="44" rx="22" fill="#fff" stroke="#4e6ef2"/>
+              <text x="170" y="248" font-size="14" font-family="Arial" fill="#333">${shortKeyword}</text>
+              <rect x="570" y="220" width="80" height="44" rx="8" fill="#4e6ef2"/>
+              <text x="610" y="248" text-anchor="middle" font-size="14" font-family="Arial" fill="#fff">百度一下</text>
+              <rect x="200" y="290" width="200" height="20" rx="3" fill="#e8f4ff"/>
+              <text x="210" y="304" font-size="11" font-family="Arial" fill="#4e6ef2">● 正在搜索: ${shortKeyword}</text>
+            </svg>` : engine === 'bing' ? `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+              <rect fill="#fff" width="800" height="600"/>
+              <text x="400" y="180" text-anchor="middle" font-size="56" font-family="Segoe UI" fill="#008373" font-weight="bold">必应</text>
+              <rect x="150" y="220" width="500" height="44" rx="4" fill="#fff" stroke="#ddd"/>
+              <text x="170" y="248" font-size="14" font-family="Arial" fill="#333">${shortKeyword}</text>
+              <circle cx="630" cy="242" r="16" fill="#008373"/>
+              <text x="630" y="248" text-anchor="middle" font-size="16" fill="#fff">🔍</text>
+              <rect x="200" y="290" width="200" height="20" rx="3" fill="#e6f7f5"/>
+              <text x="210" y="304" font-size="11" font-family="Arial" fill="#008373">● 正在搜索: ${shortKeyword}</text>
+            </svg>` : `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+              <rect fill="#fff" width="800" height="600"/>
+              <text x="400" y="200" text-anchor="middle" font-size="72" font-family="Arial" fill="#4285f4">G</text>
+              <text x="425" y="200" text-anchor="middle" font-size="72" font-family="Arial" fill="#ea4335">o</text>
+              <text x="455" y="200" text-anchor="middle" font-size="72" font-family="Arial" fill="#fbbc05">o</text>
+              <text x="485" y="200" text-anchor="middle" font-size="72" font-family="Arial" fill="#4285f4">g</text>
+              <text x="515" y="200" text-anchor="middle" font-size="72" font-family="Arial" fill="#34a853">l</text>
+              <text x="535" y="200" text-anchor="middle" font-size="72" font-family="Arial" fill="#ea4335">e</text>
+              <rect x="200" y="250" width="400" height="44" rx="22" fill="#fff" stroke="#ddd"/>
+              <text x="220" y="278" font-size="14" font-family="Arial" fill="#333">${shortKeyword}</text>
+              <circle cx="580" cy="272" r="12" fill="#4285f4"/>
+            </svg>`,
+          // 百度搜索结果
+          'search-results': engine === 'baidu' ? `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+              <rect fill="#fff" width="800" height="600"/>
+              <rect x="0" y="0" width="800" height="60" fill="#fff" stroke="#eee"/>
+              <text x="30" y="40" font-size="24" font-family="Arial" fill="#2932e1" font-weight="bold">百度</text>
+              <rect x="100" y="15" width="400" height="35" rx="4" fill="#fff" stroke="#4e6ef2"/>
+              <text x="120" y="38" font-size="14" font-family="Arial" fill="#333">${shortKeyword}</text>
+              <text x="80" y="100" font-size="12" fill="#9195a3">百度为您找到相关结果约 1,234,567 个</text>
+              <g transform="translate(80, 130)">
+                <text font-size="18" fill="#2440b3">${shortKeyword} - 详细介绍_百度百科</text>
+                <text y="22" font-size="12" fill="#9195a3">百科 - baike.baidu.com</text>
+                <text y="44" font-size="14" fill="#333">关于"${shortKeyword}"的详细信息和最新资讯...</text>
+              </g>
+              <g transform="translate(80, 220)">
+                <text font-size="18" fill="#2440b3">${shortKeyword} - 完整教程</text>
+                <text y="22" font-size="12" fill="#9195a3">www.example.com</text>
+                <text y="44" font-size="14" fill="#333">"${shortKeyword}"的完整教程和实践指南...</text>
+              </g>
+              <g transform="translate(80, 310)">
+                <text font-size="18" fill="#2440b3">${shortKeyword} - 最新动态</text>
+                <text y="22" font-size="12" fill="#9195a3">news.example.com</text>
+                <text y="44" font-size="14" fill="#333">"${shortKeyword}"相关的最新动态和信息...</text>
+              </g>
+            </svg>` : engine === 'bing' ? `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+              <rect fill="#fff" width="800" height="600"/>
+              <rect x="0" y="0" width="800" height="55" fill="#fff" stroke="#eee"/>
+              <text x="30" y="38" font-size="22" font-family="Segoe UI" fill="#008373" font-weight="bold">必应</text>
+              <rect x="100" y="12" width="450" height="36" rx="4" fill="#fff" stroke="#ddd"/>
+              <text x="120" y="36" font-size="14" font-family="Arial" fill="#333">${shortKeyword}</text>
+              <text x="80" y="90" font-size="12" fill="#666">约 1,234,567 条结果</text>
+              <g transform="translate(80, 120)">
+                <text font-size="18" fill="#001ba0">${shortKeyword} - 详细介绍</text>
+                <text y="22" font-size="12" fill="#006621">www.example.com</text>
+                <text y="44" font-size="14" fill="#333">关于"${shortKeyword}"的详细信息和最新资讯...</text>
+              </g>
+              <g transform="translate(80, 210)">
+                <text font-size="18" fill="#001ba0">${shortKeyword} - 完整教程</text>
+                <text y="22" font-size="12" fill="#006621">tutorial.example.com</text>
+                <text y="44" font-size="14" fill="#333">"${shortKeyword}"的完整教程和实践指南...</text>
+              </g>
+            </svg>` : `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+              <rect fill="#fff" width="800" height="600"/>
+              <rect x="0" y="0" width="800" height="60" fill="#fff" stroke="#eee"/>
+              <text x="30" y="40" font-size="24" font-family="Arial" fill="#4285f4">Google</text>
+              <rect x="100" y="15" width="500" height="35" rx="17" fill="#fff" stroke="#ddd"/>
+              <text x="120" y="38" font-size="14" font-family="Arial" fill="#333">${shortKeyword}</text>
+              <text x="80" y="100" font-size="12" fill="#70757a">约 1,234,567 条结果 (0.52 秒) - "${shortKeyword}"</text>
+              <g transform="translate(80, 130)">
+                <text font-size="18" fill="#1a0dab">${shortKeyword} - 详细介绍</text>
+                <text y="22" font-size="12" fill="#006621">https://example.com</text>
+                <text y="44" font-size="14" fill="#545454">关于"${shortKeyword}"的详细信息和最新资讯...</text>
+              </g>
+              <g transform="translate(80, 220)">
+                <text font-size="18" fill="#1a0dab">${shortKeyword} - 完整教程</text>
+                <text y="22" font-size="12" fill="#006621">https://tutorial.com</text>
+                <text y="44" font-size="14" fill="#545454">"${shortKeyword}"的完整教程和实践指南...</text>
+              </g>
+            </svg>`,
+          // 保留旧的 google-home 用于兼容
+          'google-home': `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+              <rect fill="#fff" width="800" height="600"/>
+              <text x="400" y="200" text-anchor="middle" font-size="72" font-family="Arial" fill="#4285f4">G</text>
+              <text x="425" y="200" text-anchor="middle" font-size="72" font-family="Arial" fill="#ea4335">o</text>
+              <text x="455" y="200" text-anchor="middle" font-size="72" font-family="Arial" fill="#fbbc05">o</text>
+              <text x="485" y="200" text-anchor="middle" font-size="72" font-family="Arial" fill="#4285f4">g</text>
+              <text x="515" y="200" text-anchor="middle" font-size="72" font-family="Arial" fill="#34a853">l</text>
+              <text x="535" y="200" text-anchor="middle" font-size="72" font-family="Arial" fill="#ea4335">e</text>
+              <rect x="200" y="250" width="400" height="44" rx="22" fill="#fff" stroke="#ddd"/>
+              <text x="220" y="278" font-size="14" font-family="Arial" fill="#333">${shortKeyword}</text>
+              <circle cx="580" cy="272" r="12" fill="#4285f4"/>
+              <rect x="200" y="310" width="180" height="20" rx="3" fill="#e8f0fe"/>
+              <text x="210" y="324" font-size="11" font-family="Arial" fill="#1a73e8">● 正在输入: ${shortKeyword}</text>
+            </svg>`,
+          'google-search': `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+              <rect fill="#fff" width="800" height="600"/>
+              <rect x="0" y="0" width="800" height="60" fill="#fff" stroke="#eee" stroke-width="1"/>
+              <text x="30" y="40" font-size="24" font-family="Arial" fill="#4285f4">Google</text>
+              <rect x="100" y="15" width="500" height="35" rx="17" fill="#fff" stroke="#ddd"/>
+              <text x="120" y="38" font-size="14" font-family="Arial" fill="#333">${shortKeyword}</text>
+              <rect x="200" y="100" width="400" height="20" rx="3" fill="#e8f0fe"/>
+              <text x="210" y="115" font-size="12" font-family="Arial" fill="#1a73e8">✓ 搜索: ${shortKeyword}</text>
+            </svg>`,
+          'google-results': `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+              <rect fill="#fff" width="800" height="600"/>
+              <rect x="0" y="0" width="800" height="60" fill="#fff" stroke="#eee"/>
+              <text x="30" y="40" font-size="24" font-family="Arial" fill="#4285f4">Google</text>
+              <rect x="100" y="15" width="500" height="35" rx="17" fill="#fff" stroke="#ddd"/>
+              <text x="120" y="38" font-size="14" font-family="Arial" fill="#333">${shortKeyword}</text>
+              <text x="80" y="100" font-size="12" fill="#70757a">约 1,234,567 条结果 (0.52 秒) - "${shortKeyword}"</text>
+              <g transform="translate(80, 130)">
+                <text font-size="18" fill="#1a0dab">${shortKeyword} - 详细介绍</text>
+                <text y="22" font-size="12" fill="#006621">https://example.com/${encodeURIComponent(keyword).substring(0, 20)}</text>
+                <text y="44" font-size="14" fill="#545454">关于"${shortKeyword}"的详细信息和最新资讯...</text>
+              </g>
+              <g transform="translate(80, 220)">
+                <text font-size="18" fill="#1a0dab">${shortKeyword} - 完整教程</text>
+                <text y="22" font-size="12" fill="#006621">https://tutorial.com/${encodeURIComponent(keyword).substring(0, 15)}</text>
+                <text y="44" font-size="14" fill="#545454">"${shortKeyword}"的完整教程和实践指南...</text>
+              </g>
+              <g transform="translate(80, 310)">
+                <text font-size="18" fill="#1a0dab">${shortKeyword} - 最新动态</text>
+                <text y="22" font-size="12" fill="#006621">https://news.com/${encodeURIComponent(keyword).substring(0, 15)}</text>
+                <text y="44" font-size="14" fill="#545454">"${shortKeyword}"相关的最新动态和信息...</text>
+              </g>
+            </svg>`,
+          'code-editor': `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+              <rect fill="#1e1e1e" width="800" height="600"/>
+              <rect x="0" y="0" width="800" height="35" fill="#323233"/>
+              <text x="20" y="23" font-size="12" font-family="monospace" fill="#cccccc">📄 ${shortKeyword.replace(/\s+/g, '_')}.py</text>
+              <text x="20" y="70" font-size="14" font-family="monospace" fill="#569cd6"># ${mediumKeyword}</text>
+              <text x="20" y="100" font-size="14" font-family="monospace" fill="#c586c0">def</text>
+              <text x="55" y="100" font-size="14" font-family="monospace" fill="#dcdcaa">execute_task</text>
+              <text x="165" y="100" font-size="14" font-family="monospace" fill="#cccccc">():</text>
+              <text x="40" y="130" font-size="14" font-family="monospace" fill="#6a9955">"""处理: ${shortKeyword}"""</text>
+              <text x="40" y="160" font-size="14" font-family="monospace" fill="#cccccc">result = process_data()</text>
+              <text x="40" y="190" font-size="14" font-family="monospace" fill="#c586c0">return</text>
+              <text x="95" y="190" font-size="14" font-family="monospace" fill="#cccccc">result</text>
+              <rect x="20" y="220" width="200" height="20" rx="3" fill="#264f78"/>
+              <text x="30" y="234" font-size="11" font-family="Arial" fill="#4fc1ff">✓ 代码生成完成</text>
+            </svg>`,
+          'llm-thinking': `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+              <rect fill="#0f172a" width="800" height="600"/>
+              <circle cx="400" cy="200" r="80" fill="none" stroke="#3b82f6" stroke-width="3" opacity="0.3"/>
+              <circle cx="400" cy="200" r="60" fill="none" stroke="#8b5cf6" stroke-width="2" opacity="0.5"/>
+              <circle cx="400" cy="200" r="40" fill="#1e40af"/>
+              <text x="400" y="210" text-anchor="middle" font-size="24" fill="#fff">🧠</text>
+              <text x="400" y="320" text-anchor="middle" font-size="20" fill="#e2e8f0" font-weight="bold">AI 分析中</text>
+              <text x="400" y="360" text-anchor="middle" font-size="14" fill="#94a3b8">"${shortKeyword}"</text>
+              <rect x="200" y="400" width="400" height="8" rx="4" fill="#1e293b"/>
+              <rect x="200" y="400" width="280" height="8" rx="4" fill="#3b82f6"/>
+              <text x="400" y="440" text-anchor="middle" font-size="12" fill="#64748b">正在整理信息，生成报告...</text>
+            </svg>`,
+          'file-system': `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+              <rect fill="#1a1a2e" width="800" height="600"/>
+              <rect x="0" y="0" width="800" height="40" fill="#16213e"/>
+              <text x="20" y="26" font-size="14" font-family="monospace" fill="#eee">📁 文件管理器 - ${shortKeyword}</text>
+              <rect x="40" y="80" width="720" height="40" rx="4" fill="#0f3460"/>
+              <text x="60" y="106" font-size="14" font-family="monospace" fill="#00ff88">📄 ${shortKeyword.replace(/\s+/g, '_')}_report.md</text>
+              <text x="500" y="106" font-size="12" font-family="monospace" fill="#888">刚刚创建</text>
+              <rect x="40" y="130" width="720" height="40" rx="4" fill="#0f3460"/>
+              <text x="60" y="156" font-size="14" font-family="monospace" fill="#00ff88">📊 ${shortKeyword.replace(/\s+/g, '_')}_data.json</text>
+              <text x="500" y="156" font-size="12" font-family="monospace" fill="#888">2.5 KB</text>
+              <rect x="40" y="200" width="200" height="24" rx="3" fill="#1a936f"/>
+              <text x="55" y="217" font-size="12" font-family="Arial" fill="#fff">✓ 文件保存成功</text>
+            </svg>`,
+          'result-display': `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+              <defs>
+                <linearGradient id="resultBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#1a1a2e"/>
+                  <stop offset="100%" style="stop-color:#16213e"/>
+                </linearGradient>
+              </defs>
+              <rect fill="url(#resultBg)" width="800" height="600"/>
+              <rect x="40" y="30" width="720" height="540" rx="12" fill="#0f0f23" stroke="#3b82f6" stroke-width="1"/>
+              <rect x="40" y="30" width="720" height="50" rx="12" fill="#1e3a5f"/>
+              <text x="70" y="62" font-size="18" font-family="Arial" fill="#fff" font-weight="bold">📊 执行结果 - ${shortKeyword}</text>
+              <rect x="60" y="100" width="680" height="120" rx="8" fill="#1e293b"/>
+              <text x="80" y="130" font-size="14" font-family="Arial" fill="#94a3b8">任务摘要</text>
+              <text x="80" y="160" font-size="16" font-family="Arial" fill="#e2e8f0">${mediumKeyword}</text>
+              <text x="80" y="190" font-size="12" font-family="Arial" fill="#22c55e">✓ 任务已成功完成</text>
+              <rect x="60" y="240" width="680" height="200" rx="8" fill="#1e293b"/>
+              <text x="80" y="270" font-size="14" font-family="Arial" fill="#94a3b8">主要发现</text>
+              <text x="80" y="300" font-size="13" font-family="Arial" fill="#e2e8f0">• 已收集并整理相关信息</text>
+              <text x="80" y="330" font-size="13" font-family="Arial" fill="#e2e8f0">• 数据分析完成，生成结构化报告</text>
+              <text x="80" y="360" font-size="13" font-family="Arial" fill="#e2e8f0">• 所有步骤执行成功</text>
+              <text x="80" y="390" font-size="13" font-family="Arial" fill="#e2e8f0">• 结果已准备好保存</text>
+              <rect x="60" y="460" width="680" height="90" rx="8" fill="#1e293b"/>
+              <text x="80" y="490" font-size="14" font-family="Arial" fill="#94a3b8">统计信息</text>
+              <text x="80" y="520" font-size="13" font-family="Arial" fill="#3b82f6">🔍 搜索结果: 15条</text>
+              <text x="250" y="520" font-size="13" font-family="Arial" fill="#8b5cf6">📝 提取内容: 3页</text>
+              <text x="420" y="520" font-size="13" font-family="Arial" fill="#22c55e">⏱️ 用时: 12秒</text>
+            </svg>`,
+          'file-saved': `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+              <defs>
+                <linearGradient id="bgGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#0c0c1d"/>
+                  <stop offset="50%" style="stop-color:#1a1a3e"/>
+                  <stop offset="100%" style="stop-color:#0c0c1d"/>
+                </linearGradient>
+                <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#1e293b"/>
+                  <stop offset="100%" style="stop-color:#0f172a"/>
+                </linearGradient>
+                <linearGradient id="successGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style="stop-color:#4ade80"/>
+                  <stop offset="100%" style="stop-color:#22c55e"/>
+                </linearGradient>
+                <filter id="glow2" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="8" result="blur"/>
+                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <filter id="shadow">
+                  <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3"/>
+                </filter>
+              </defs>
+              <!-- 背景 -->
+              <rect fill="url(#bgGrad2)" width="800" height="600"/>
+              <!-- 装饰粒子 -->
+              <circle cx="100" cy="100" r="2" fill="#4ade80" opacity="0.5"/>
+              <circle cx="700" cy="150" r="3" fill="#3b82f6" opacity="0.4"/>
+              <circle cx="150" cy="450" r="2" fill="#8b5cf6" opacity="0.5"/>
+              <circle cx="650" cy="500" r="2" fill="#22c55e" opacity="0.4"/>
+              <!-- 主卡片 -->
+              <rect x="100" y="80" width="600" height="440" rx="24" fill="url(#cardGrad)" filter="url(#shadow)"/>
+              <rect x="100" y="80" width="600" height="440" rx="24" fill="none" stroke="url(#successGrad2)" stroke-width="2" opacity="0.5"/>
+              <!-- 成功图标 - 更精致 -->
+              <circle cx="400" cy="180" r="55" fill="#0f172a"/>
+              <circle cx="400" cy="180" r="50" fill="url(#successGrad2)" filter="url(#glow2)"/>
+              <path d="M375 180 L392 197 L425 160" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <!-- 标题区 -->
+              <text x="400" y="280" text-anchor="middle" font-size="28" fill="#fff" font-weight="600" font-family="-apple-system, BlinkMacSystemFont, sans-serif">任务执行成功</text>
+              <text x="400" y="315" text-anchor="middle" font-size="14" fill="#64748b" font-family="-apple-system, sans-serif">${mediumKeyword}</text>
+              <!-- 结果统计 - 三列布局 -->
+              <g transform="translate(140, 350)">
+                <rect width="160" height="100" rx="12" fill="#0f172a" stroke="#22c55e" stroke-width="1" opacity="0.8"/>
+                <text x="80" y="40" text-anchor="middle" font-size="28" fill="#4ade80">✓</text>
+                <text x="80" y="65" text-anchor="middle" font-size="13" fill="#94a3b8">执行成功</text>
+                <text x="80" y="85" text-anchor="middle" font-size="11" fill="#64748b">所有步骤已完成</text>
+              </g>
+              <g transform="translate(320, 350)">
+                <rect width="160" height="100" rx="12" fill="#0f172a" stroke="#3b82f6" stroke-width="1" opacity="0.8"/>
+                <text x="80" y="40" text-anchor="middle" font-size="28" fill="#60a5fa">📊</text>
+                <text x="80" y="65" text-anchor="middle" font-size="13" fill="#94a3b8">报告已生成</text>
+                <text x="80" y="85" text-anchor="middle" font-size="11" fill="#64748b">Markdown 格式</text>
+              </g>
+              <g transform="translate(500, 350)">
+                <rect width="160" height="100" rx="12" fill="#0f172a" stroke="#8b5cf6" stroke-width="1" opacity="0.8"/>
+                <text x="80" y="40" text-anchor="middle" font-size="28" fill="#a78bfa">💾</text>
+                <text x="80" y="65" text-anchor="middle" font-size="13" fill="#94a3b8">文件已保存</text>
+                <text x="80" y="85" text-anchor="middle" font-size="11" fill="#64748b">workspace/results/</text>
+              </g>
+            </svg>`,
+          'page-content': `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+              <rect fill="#f8f9fa" width="800" height="600"/>
+              <rect x="0" y="0" width="800" height="50" fill="#1a73e8"/>
+              <text x="30" y="32" font-size="18" fill="#fff">📄 ${shortKeyword}</text>
+              <rect x="50" y="80" width="700" height="480" fill="#fff" rx="8"/>
+              <text x="80" y="120" font-size="20" fill="#202124" font-weight="bold">${mediumKeyword}</text>
+              <rect x="80" y="150" width="600" height="12" fill="#e0e0e0" rx="2"/>
+              <rect x="80" y="175" width="550" height="12" fill="#e0e0e0" rx="2"/>
+              <rect x="80" y="200" width="580" height="12" fill="#e0e0e0" rx="2"/>
+              <rect x="80" y="240" width="250" height="20" fill="#e8f0fe" rx="3"/>
+              <text x="90" y="255" font-size="11" fill="#1a73e8">✓ 已提取: ${shortKeyword}</text>
+              <rect x="80" y="280" width="600" height="12" fill="#e0e0e0" rx="2"/>
+              <rect x="80" y="305" width="520" height="12" fill="#e0e0e0" rx="2"/>
+            </svg>`,
+          'complete': `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+              <rect fill="#f0fdf4" width="800" height="600"/>
+              <circle cx="400" cy="220" r="60" fill="#22c55e"/>
+              <path d="M370 220 L390 240 L430 200" stroke="#fff" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="400" y="320" text-anchor="middle" font-size="24" fill="#166534" font-weight="bold">任务执行完成!</text>
+              <text x="400" y="360" text-anchor="middle" font-size="16" fill="#4ade80">"${shortKeyword}"</text>
+              <text x="400" y="400" text-anchor="middle" font-size="14" fill="#22c55e">已生成结构化报告</text>
+            </svg>`
+        };
+        
+        const svg = svgTemplates[type] || svgTemplates['google-home'];
+        return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+      }
+
+      // XML 转义
+      escapeXml(str) {
+        return String(str || '').replace(/[&<>"']/g, c => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+      }
+    }
+
+    // Initialize workspace
+    const workspace = new AgentWorkspace();
+    window.workspace = workspace; // 暴露到全局作用域
+    
+    // Initialize i18n for workspace page
+    if (typeof i18n !== 'undefined') {
+      i18n.init();
+      // Update page title for workspace
+      document.title = `JoinFlow - ${i18n.t('workspace')}`;
+    }
+    
+    // Language toggle function
+    function toggleLanguage() {
+      if (typeof i18n !== 'undefined') {
+        i18n.toggle();
+        // Update page title after language change
+        document.title = `JoinFlow - ${i18n.t('workspace')}`;
+      }
+    }
+
+    function executeCommand() {
+      const input = document.getElementById('commandInput');
+      workspace.executeCommand(input.value);
+    }
+
+    // ========================================
+    // PARTICLE SYSTEM
+    // ========================================
+    
+    class ParticleSystem {
+      constructor(containerId, count = 50) {
+        this.container = document.getElementById(containerId);
+        this.count = count;
+        this.init();
+      }
+
+      init() {
+        for (let i = 0; i < this.count; i++) {
+          this.createParticle(i);
+        }
+      }
+
+      createParticle(index) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        
+        // Random position and animation
+        const x = Math.random() * 100;
+        const duration = 15 + Math.random() * 20;
+        const delay = Math.random() * -20;
+        const size = 1 + Math.random() * 2;
+        
+        particle.style.cssText = `
+          left: ${x}%;
+          width: ${size}px;
+          height: ${size}px;
+          animation-duration: ${duration}s;
+          animation-delay: ${delay}s;
+          background: ${index % 3 === 0 ? 'var(--accent-cyan)' : index % 3 === 1 ? 'var(--accent-purple)' : 'var(--accent-blue)'};
+          box-shadow: 0 0 ${size * 3}px currentColor;
+        `;
+        
+        this.container.appendChild(particle);
+      }
+    }
+
+    // Initialize particles
+    new ParticleSystem('particlesBg', 40);
+
+    // ========================================
+    // TYPING EFFECT FOR THINKING
+    // ========================================
+    
+    class TypeWriter {
+      constructor(element, speed = 30) {
+        this.element = element;
+        this.speed = speed;
+        this.queue = [];
+        this.isTyping = false;
+      }
+
+      type(text) {
+        this.queue.push(text);
+        if (!this.isTyping) {
+          this.processQueue();
+        }
+      }
+
+      async processQueue() {
+        this.isTyping = true;
+        while (this.queue.length > 0) {
+          const text = this.queue.shift();
+          await this.typeText(text);
+        }
+        this.isTyping = false;
+      }
+
+      async typeText(text) {
+        this.element.textContent = '';
+        for (let i = 0; i < text.length; i++) {
+          this.element.textContent += text[i];
+          await new Promise(r => setTimeout(r, this.speed));
+        }
+      }
+    }
+
+    // Add glow effect on hover for step cards
+    document.querySelectorAll('.step-content').forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        card.style.boxShadow = '0 0 30px rgba(0, 245, 255, 0.2)';
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.boxShadow = 'none';
+      });
+    });
+  </script>
+</body>
+</html>
+

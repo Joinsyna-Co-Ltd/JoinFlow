@@ -1,0 +1,313 @@
+# JoinFlow 云服务完整部署配置
+# 企业级云部署方案
+# 使用: docker-compose -f deploy/docker-compose.cloud.yml up -d
+
+version: "3.9"
+
+services:
+  # ===========================================
+  # 反向代理 & 负载均衡
+  # ===========================================
+  nginx:
+    image: nginx:alpine
+    container_name: joinflow-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/html:/usr/share/nginx/html:ro
+    depends_on:
+      - joinflow
+      - joinflow-worker
+    networks:
+      - frontend
+      - backend
+    restart: always
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ===========================================
+  # JoinFlow 主服务 (可水平扩展)
+  # ===========================================
+  joinflow:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: joinflow/app:latest
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    environment:
+      - NODE_ENV=production
+      - WORKERS=4
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - QDRANT_URL=http://qdrant:6333
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_URL=postgresql://joinflow:${DB_PASSWORD}@postgres:5432/joinflow
+      - JWT_SECRET=${JWT_SECRET}
+      - STORAGE_TYPE=s3
+      - S3_BUCKET=${S3_BUCKET}
+      - S3_REGION=${S3_REGION}
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY}
+      - S3_SECRET_KEY=${S3_SECRET_KEY}
+    volumes:
+      - app_data:/app/data
+      - app_logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ===========================================
+  # 后台任务处理 Worker
+  # ===========================================
+  joinflow-worker:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: joinflow/app:latest
+    command: python -m joinflow_core.worker
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    environment:
+      - WORKER_MODE=true
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_URL=postgresql://joinflow:${DB_PASSWORD}@postgres:5432/joinflow
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - backend
+    restart: always
+
+  # ===========================================
+  # 定时任务调度器
+  # ===========================================
+  joinflow-scheduler:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: joinflow/app:latest
+    command: python -m joinflow_core.scheduler_runner
+    environment:
+      - SCHEDULER_MODE=true
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_URL=postgresql://joinflow:${DB_PASSWORD}@postgres:5432/joinflow
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - backend
+    restart: always
+
+  # ===========================================
+  # 数据库服务
+  # ===========================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: joinflow-postgres
+    environment:
+      - POSTGRES_USER=joinflow
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=joinflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d:ro
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U joinflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # 向量数据库
+  # ===========================================
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: joinflow-qdrant
+    volumes:
+      - qdrant_data:/qdrant/storage
+    environment:
+      - QDRANT__LOG_LEVEL=INFO
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ===========================================
+  # 缓存服务
+  # ===========================================
+  redis:
+    image: redis:7-alpine
+    container_name: joinflow-redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # 监控服务
+  # ===========================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: joinflow-prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    networks:
+      - backend
+      - monitoring
+    restart: always
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: joinflow-grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+      - frontend
+    restart: always
+
+  # ===========================================
+  # 日志收集
+  # ===========================================
+  loki:
+    image: grafana/loki:latest
+    container_name: joinflow-loki
+    volumes:
+      - ./monitoring/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - monitoring
+    restart: always
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: joinflow-promtail
+    volumes:
+      - ./monitoring/promtail-config.yml:/etc/promtail/config.yml:ro
+      - app_logs:/var/log/joinflow:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - monitoring
+    restart: always
+
+  # ===========================================
+  # 代码执行沙盒 (隔离环境)
+  # ===========================================
+  sandbox:
+    build:
+      context: ..
+      dockerfile: Dockerfile.sandbox
+    image: joinflow/sandbox:latest
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=100M,mode=1777
+    ulimits:
+      nproc: 100
+      nofile:
+        soft: 1024
+        hard: 2048
+    networks:
+      - sandbox_net
+    restart: always
+
+# ===========================================
+# 数据卷
+# ===========================================
+volumes:
+  postgres_data:
+  qdrant_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+  app_data:
+  app_logs:
+
+# ===========================================
+# 网络配置
+# ===========================================
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true
+  monitoring:
+    driver: bridge
+  sandbox_net:
+    driver: bridge
+    internal: true
+

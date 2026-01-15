@@ -1,0 +1,405 @@
+# JoinFlow Kubernetes 部署配置
+# 企业级云原生部署方案
+# 使用: kubectl apply -f deploy/kubernetes/
+
+---
+# 命名空间
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: joinflow
+  labels:
+    app: joinflow
+
+---
+# ConfigMap - 应用配置
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: joinflow-config
+  namespace: joinflow
+data:
+  WORKERS: "4"
+  LOG_LEVEL: "INFO"
+  QDRANT_URL: "http://qdrant-service:6333"
+  REDIS_URL: "redis://redis-service:6379"
+
+---
+# Secret - 敏感配置
+apiVersion: v1
+kind: Secret
+metadata:
+  name: joinflow-secrets
+  namespace: joinflow
+type: Opaque
+stringData:
+  OPENAI_API_KEY: "${OPENAI_API_KEY}"
+  ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
+  JWT_SECRET: "${JWT_SECRET}"
+  DB_PASSWORD: "${DB_PASSWORD}"
+
+---
+# JoinFlow 主服务 Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: joinflow-api
+  namespace: joinflow
+  labels:
+    app: joinflow
+    component: api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: joinflow
+      component: api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: joinflow
+        component: api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: joinflow-sa
+      containers:
+        - name: joinflow
+          image: joinflow/app:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: joinflow-config
+            - secretRef:
+                name: joinflow-secrets
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: app-data
+              mountPath: /app/data
+            - name: app-logs
+              mountPath: /app/logs
+      volumes:
+        - name: app-data
+          persistentVolumeClaim:
+            claimName: joinflow-data-pvc
+        - name: app-logs
+          emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: joinflow
+                    component: api
+                topologyKey: kubernetes.io/hostname
+
+---
+# Worker Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: joinflow-worker
+  namespace: joinflow
+  labels:
+    app: joinflow
+    component: worker
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: joinflow
+      component: worker
+  template:
+    metadata:
+      labels:
+        app: joinflow
+        component: worker
+    spec:
+      containers:
+        - name: worker
+          image: joinflow/app:latest
+          command: ["python", "-m", "joinflow_core.worker"]
+          envFrom:
+            - configMapRef:
+                name: joinflow-config
+            - secretRef:
+                name: joinflow-secrets
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+
+---
+# Scheduler Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: joinflow-scheduler
+  namespace: joinflow
+  labels:
+    app: joinflow
+    component: scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: joinflow
+      component: scheduler
+  template:
+    metadata:
+      labels:
+        app: joinflow
+        component: scheduler
+    spec:
+      containers:
+        - name: scheduler
+          image: joinflow/app:latest
+          command: ["python", "-m", "joinflow_core.scheduler_runner"]
+          envFrom:
+            - configMapRef:
+                name: joinflow-config
+            - secretRef:
+                name: joinflow-secrets
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+---
+# API Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: joinflow-api-service
+  namespace: joinflow
+  labels:
+    app: joinflow
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+      name: http
+  selector:
+    app: joinflow
+    component: api
+
+---
+# HPA - 自动水平扩缩容
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: joinflow-api-hpa
+  namespace: joinflow
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: joinflow-api
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+---
+# Worker HPA
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: joinflow-worker-hpa
+  namespace: joinflow
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: joinflow-worker
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+
+---
+# Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: joinflow-ingress
+  namespace: joinflow
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+    - hosts:
+        - joinflow.example.com
+        - api.joinflow.example.com
+      secretName: joinflow-tls
+  rules:
+    - host: joinflow.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: joinflow-api-service
+                port:
+                  number: 8000
+    - host: api.joinflow.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: joinflow-api-service
+                port:
+                  number: 8000
+
+---
+# PersistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: joinflow-data-pvc
+  namespace: joinflow
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 50Gi
+
+---
+# ServiceAccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: joinflow-sa
+  namespace: joinflow
+
+---
+# NetworkPolicy - 网络隔离
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: joinflow-network-policy
+  namespace: joinflow
+spec:
+  podSelector:
+    matchLabels:
+      app: joinflow
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8000
+    - from:
+        - podSelector:
+            matchLabels:
+              app: joinflow
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: joinflow
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              app: redis
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              app: qdrant
+    - to:  # 允许访问外网 (API 调用)
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+
+---
+# PodDisruptionBudget - 保证高可用
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: joinflow-api-pdb
+  namespace: joinflow
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: joinflow
+      component: api
+

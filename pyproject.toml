@@ -1,0 +1,164 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "joinflow"
+version = "0.2.0"
+description = "Multi-Agent RAG System with retrieval-first design"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+
+authors = [
+    { name = "K. S. N. Ganesh" }
+]
+
+dependencies = [
+    "qdrant-client>=1.7.0",
+]
+
+[project.optional-dependencies]
+# Core RAG functionality
+rag = [
+    "sentence-transformers>=2.2.0",
+]
+
+# Agent system - minimal
+agent = [
+    "litellm>=1.0.0",
+    "psutil>=5.9.0",
+]
+
+# Browser automation
+browser = [
+    "playwright>=1.40.0",
+]
+
+# GUI Agent (Agent-S style computer use)
+gui = [
+    "pyautogui>=0.9.54",
+    "pillow>=10.0.0",
+    "pyperclip>=1.8.0",
+    "litellm>=1.0.0",
+    "psutil>=5.9.0",
+]
+
+# Data processing
+data = [
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "matplotlib>=3.7.0",
+    "openpyxl>=3.1.0",
+]
+
+# Web API
+api = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+    "python-multipart>=0.0.6",
+    "jinja2>=3.1.0",
+]
+
+# Full installation with all features
+full = [
+    # RAG
+    "sentence-transformers>=2.2.0",
+    # LLM
+    "litellm>=1.0.0",
+    "openai>=1.0.0",
+    # Browser
+    "playwright>=1.40.0",
+    # System
+    "psutil>=5.9.0",
+    # GUI Agent (Agent-S style)
+    "pyautogui>=0.9.54",
+    "pyperclip>=1.8.0",
+    # Data
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "matplotlib>=3.7.0",
+    "openpyxl>=3.1.0",
+    # Vision
+    "pillow>=10.0.0",
+    # API & Web UI
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+    "python-multipart>=0.0.6",
+    "jinja2>=3.1.0",
+    # Document processing
+    "PyPDF2>=3.0.0",
+    "python-docx>=0.8.11",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=4.9.0",
+    # PDF export
+    "reportlab>=4.0.0",
+    # PPT export (Enterprise feature)
+    "python-pptx>=0.6.21",
+    # HTTP client
+    "requests>=2.31.0",
+    "aiohttp>=3.9.0",
+]
+
+# Enterprise features
+enterprise = [
+    # All full features
+    "sentence-transformers>=2.2.0",
+    "litellm>=1.0.0",
+    "openai>=1.0.0",
+    "playwright>=1.40.0",
+    "psutil>=5.9.0",
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "matplotlib>=3.7.0",
+    "openpyxl>=3.1.0",
+    "pillow>=10.0.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+    "python-multipart>=0.0.6",
+    "jinja2>=3.1.0",
+    "PyPDF2>=3.0.0",
+    "python-docx>=0.8.11",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=4.9.0",
+    "reportlab>=4.0.0",
+    "python-pptx>=0.6.21",
+    "requests>=2.31.0",
+    "aiohttp>=3.9.0",
+    # Additional enterprise features
+    "schedule>=1.2.0",          # Advanced scheduling
+    "python-crontab>=3.0.0",    # Cron management
+    "watchdog>=3.0.0",          # File monitoring
+]
+
+# Development and testing
+dev = [
+    "sentence-transformers>=2.2.0",
+    "litellm>=1.0.0",
+    "playwright>=1.40.0",
+    "psutil>=5.9.0",
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "matplotlib>=3.7.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "tqdm>=4.65.0",
+    "httpx>=0.24.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/YOUR_USERNAME/joinflow"
+Repository = "https://github.com/YOUR_USERNAME/joinflow"
+
+[project.scripts]
+joinflow = "main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["joinflow_core*", "joinflow_index*", "joinflow_rag*", "joinflow_agent*", "joinflow_memory*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

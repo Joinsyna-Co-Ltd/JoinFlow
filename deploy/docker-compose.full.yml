@@ -1,0 +1,297 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                              ║
+# ║      JoinFlow 完整云服务 Docker Compose 配置                                  ║
+# ║      包含: 应用 + 数据库 + 缓存 + 监控 + 反向代理                             ║
+# ║                                                                              ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+version: "3.9"
+
+services:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 反向代理 / 负载均衡
+  # ═══════════════════════════════════════════════════════════════════════════
+  nginx:
+    image: nginx:alpine
+    container_name: joinflow-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/html:/usr/share/nginx/html:ro
+      - ../web/static:/app/web/static:ro
+    depends_on:
+      - joinflow
+    networks:
+      - joinflow-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # JoinFlow 主应用
+  # ═══════════════════════════════════════════════════════════════════════════
+  joinflow:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: joinflow/app:latest
+    container_name: joinflow-app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../config.json:/app/config.json:ro
+      - joinflow-workspace:/app/workspace
+      - joinflow-knowledge:/app/knowledge_base
+      - joinflow-sessions:/app/sessions
+      - joinflow-exports:/app/exports
+      - joinflow-plugins:/app/plugins
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - QDRANT_URL=http://qdrant:6333
+      - REDIS_URL=redis://redis:6379
+      - SANDBOX_ENABLED=true
+      - LOG_LEVEL=INFO
+      - WORKERS=${WORKERS:-4}
+    depends_on:
+      qdrant:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - joinflow-network
+      - sandbox-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 向量数据库 (知识库)
+  # ═══════════════════════════════════════════════════════════════════════════
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: joinflow-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant-data:/qdrant/storage
+    environment:
+      - QDRANT__LOG_LEVEL=INFO
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    networks:
+      - joinflow-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Redis 缓存
+  # ═══════════════════════════════════════════════════════════════════════════
+  redis:
+    image: redis:7-alpine
+    container_name: joinflow-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - joinflow-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 代码执行沙盒
+  # ═══════════════════════════════════════════════════════════════════════════
+  sandbox:
+    build:
+      context: ..
+      dockerfile: Dockerfile.sandbox
+    image: joinflow/sandbox:latest
+    container_name: joinflow-sandbox
+    volumes:
+      - sandbox-workspace:/workspace
+    working_dir: /workspace
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+    read_only: false
+    tmpfs:
+      - /tmp:size=100M,mode=1777
+    ulimits:
+      nproc: 100
+      nofile:
+        soft: 1024
+        hard: 2048
+    mem_limit: 512m
+    memswap_limit: 512m
+    cpus: 1
+    pids_limit: 100
+    networks:
+      - sandbox-network
+    restart: unless-stopped
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 监控: Prometheus
+  # ═══════════════════════════════════════════════════════════════════════════
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: joinflow-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - joinflow-network
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 监控: Grafana
+  # ═══════════════════════════════════════════════════════════════════════════
+  grafana:
+    image: grafana/grafana:latest
+    container_name: joinflow-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-piechart-panel
+    networks:
+      - joinflow-network
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 节点监控
+  # ═══════════════════════════════════════════════════════════════════════════
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: joinflow-node-exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - joinflow-network
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 容器监控
+  # ═══════════════════════════════════════════════════════════════════════════
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: joinflow-cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    privileged: true
+    networks:
+      - joinflow-network
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 网络
+# ═══════════════════════════════════════════════════════════════════════════
+networks:
+  joinflow-network:
+    driver: bridge
+    name: joinflow-network
+  
+  sandbox-network:
+    driver: bridge
+    name: sandbox-network
+    internal: true  # 沙盒网络隔离，无外网访问
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 持久化存储
+# ═══════════════════════════════════════════════════════════════════════════
+volumes:
+  qdrant-data:
+    name: joinflow-qdrant-data
+  redis-data:
+    name: joinflow-redis-data
+  joinflow-workspace:
+    name: joinflow-workspace
+  joinflow-knowledge:
+    name: joinflow-knowledge
+  joinflow-sessions:
+    name: joinflow-sessions
+  joinflow-exports:
+    name: joinflow-exports
+  joinflow-plugins:
+    name: joinflow-plugins
+  sandbox-workspace:
+    name: joinflow-sandbox-workspace
+  prometheus-data:
+    name: joinflow-prometheus-data
+  grafana-data:
+    name: joinflow-grafana-data
+

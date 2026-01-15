@@ -1,0 +1,22 @@
+# JoinFlow 健康检查定时器
+# 每分钟执行一次健康检查
+#
+# 安装命令:
+#   sudo cp joinflow-health.* /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable joinflow-health.timer
+#   sudo systemctl start joinflow-health.timer
+
+[Unit]
+Description=JoinFlow 定期健康检查
+Requires=joinflow.service
+
+[Timer]
+OnBootSec=60
+OnUnitActiveSec=60
+AccuracySec=10
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+

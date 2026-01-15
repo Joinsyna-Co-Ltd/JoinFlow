@@ -1,0 +1,641 @@
+{
+  "version": "1.0",
+  "updated_at": "2026-01-09T15:36:47.721711",
+  "experiences": [
+    {
+      "id": "exp_20260109_145602_0",
+      "task": "open notepad",
+      "task_hash": "929f02d8792e",
+      "success": true,
+      "actions": [
+        {
+          "action_type": "click",
+          "target": "任务栏上的搜索图标",
+          "text": null,
+          "coordinates": [
+            30,
+            1064
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "Windows任务栏中的搜索框",
+          "text": null,
+          "coordinates": [
+            435,
+            1074
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "任务栏中的Windows搜索图标",
+          "text": null,
+          "coordinates": [
+            573,
+            1063
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "Windows search icon on taskbar",
+          "text": "",
+          "coordinates": [
+            573,
+            1063
+          ],
+          "success": true
+        },
+        {
+          "action_type": "hotkey",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": true
+        },
+        {
+          "action_type": "type",
+          "target": "Windows搜索框",
+          "text": "notepad",
+          "coordinates": [
+            486,
+            976
+          ],
+          "success": true
+        },
+        {
+          "action_type": "press",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "任务栏中的记事本图标",
+          "text": "",
+          "coordinates": [
+            554,
+            1063
+          ],
+          "success": true
+        },
+        {
+          "action_type": "done",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": false
+        }
+      ],
+      "steps_count": 9,
+      "duration_ms": 101922.301,
+      "error": null,
+      "app_context": null,
+      "tags": [],
+      "created_at": "2026-01-09T14:56:02.853332",
+      "used_count": 3
+    },
+    {
+      "id": "exp_20260109_150235_1",
+      "task": "甯垜鐪嬬湅鎴戠數鑴戞満鍣ㄩ厤缃槸浠€涔堟牱瀛愮殑",
+      "task_hash": "02ee16f675a8",
+      "success": false,
+      "actions": [
+        {
+          "action_type": "click",
+          "target": "新建任务按钮",
+          "text": null,
+          "coordinates": [
+            245,
+            162
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "新建任务按钮",
+          "text": "",
+          "coordinates": [
+            245,
+            163
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "文件处理",
+          "text": null,
+          "coordinates": [
+            538,
+            538
+          ],
+          "success": true
+        },
+        {
+          "action_type": "type",
+          "target": "任务描述输入框",
+          "text": "查看我的电脑机器配置信息",
+          "coordinates": [
+            512,
+            953
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "Run Everything按钮",
+          "text": null,
+          "coordinates": [
+            770,
+            490
+          ],
+          "success": true
+        },
+        {
+          "action_type": "wait",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "run_gui_agent.py",
+          "text": null,
+          "coordinates": [
+            310,
+            18
+          ],
+          "success": true
+        },
+        {
+          "action_type": "double_click",
+          "target": "run_gui_agent.py",
+          "text": null,
+          "coordinates": [
+            25,
+            67
+          ],
+          "success": true
+        },
+        {
+          "action_type": "type",
+          "target": "run_gui_agent.py",
+          "text": "import sys\nif sys.platform == 'win32':\n    sys.stdout = TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')",
+          "coordinates": [
+            295,
+            24
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "Run Everything按钮",
+          "text": "",
+          "coordinates": [
+            770,
+            170
+          ],
+          "success": true
+        }
+      ],
+      "steps_count": 10,
+      "duration_ms": 110083.159,
+      "error": "Max steps exceeded",
+      "app_context": null,
+      "tags": [],
+      "created_at": "2026-01-09T15:02:35.140765",
+      "used_count": 0
+    },
+    {
+      "id": "exp_20260109_151650_2",
+      "task": "Open Notepad",
+      "task_hash": "929f02d8792e",
+      "success": false,
+      "actions": [
+        {
+          "action_type": "click",
+          "target": "Windows search box on the taskbar",
+          "text": null,
+          "coordinates": [
+            220,
+            1079
+          ],
+          "success": true
+        },
+        {
+          "action_type": "wait",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "Taskbar",
+          "text": "",
+          "coordinates": [
+            0,
+            1030
+          ],
+          "success": true
+        },
+        {
+          "action_type": "type",
+          "target": "the terminal or command prompt",
+          "text": "notepad",
+          "coordinates": [
+            719,
+            83
+          ],
+          "success": true
+        },
+        {
+          "action_type": "hotkey",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": true
+        },
+        {
+          "action_type": "type",
+          "target": "the input field in the dialog box",
+          "text": "notepad",
+          "coordinates": [
+            73,
+            867
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "Taskbar to check if Notepad is running",
+          "text": null,
+          "coordinates": [
+            960,
+            1079
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "任务栏中的记事本图标",
+          "text": null,
+          "coordinates": [
+            562,
+            1040
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "任务栏中的Notepad图标",
+          "text": null,
+          "coordinates": [
+            562,
+            1040
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "任务栏中的Notepad图标",
+          "text": null,
+          "coordinates": [
+            573,
+            1040
+          ],
+          "success": true
+        }
+      ],
+      "steps_count": 10,
+      "duration_ms": 129648.952,
+      "error": "Max steps exceeded",
+      "app_context": null,
+      "tags": [],
+      "created_at": "2026-01-09T15:16:50.436349",
+      "used_count": 0
+    },
+    {
+      "id": "exp_20260109_152716_3",
+      "task": "Take a screenshot of the desktop",
+      "task_hash": "8c7b0e059db9",
+      "success": true,
+      "actions": [
+        {
+          "action_type": "click",
+          "target": "微信窗口最小化按钮",
+          "text": "",
+          "coordinates": [
+            582,
+            189
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "应用程序窗口的最小化按钮",
+          "text": "",
+          "coordinates": [
+            1858,
+            8
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "当前开发环境窗口的最小化按钮",
+          "text": null,
+          "coordinates": [
+            1564,
+            8
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "任务栏中的文件资源管理器图标",
+          "text": null,
+          "coordinates": [
+            370,
+            984
+          ],
+          "success": true
+        },
+        {
+          "action_type": "hotkey",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": true
+        },
+        {
+          "action_type": "hotkey",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": true
+        },
+        {
+          "action_type": "done",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": false
+        }
+      ],
+      "steps_count": 7,
+      "duration_ms": 64012.14,
+      "error": null,
+      "app_context": null,
+      "tags": [],
+      "created_at": "2026-01-09T15:27:16.671685",
+      "used_count": 1
+    },
+    {
+      "id": "exp_20260109_152921_4",
+      "task": "Open Calculator",
+      "task_hash": "19f836ff2c78",
+      "success": false,
+      "actions": [
+        {
+          "action_type": "click",
+          "target": "任务栏中的 Windows 搜索框",
+          "text": null,
+          "coordinates": [
+            115,
+            1053
+          ],
+          "success": true
+        },
+        {
+          "action_type": "hotkey",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": true
+        },
+        {
+          "action_type": "type",
+          "target": "搜索框",
+          "text": "计算器",
+          "coordinates": [
+            502,
+            470
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "Windows search icon in taskbar",
+          "text": null,
+          "coordinates": [
+            28,
+            1063
+          ],
+          "success": true
+        },
+        {
+          "action_type": "hotkey",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": true
+        },
+        {
+          "action_type": "type",
+          "target": "Windows搜索框",
+          "text": "计算器",
+          "coordinates": [
+            374,
+            976
+          ],
+          "success": true
+        },
+        {
+          "action_type": "hotkey",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "计算器应用图标",
+          "text": "",
+          "coordinates": [
+            507,
+            974
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "任务栏中的计算器图标",
+          "text": null,
+          "coordinates": [
+            370,
+            1074
+          ],
+          "success": true
+        },
+        {
+          "action_type": "hotkey",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": true
+        }
+      ],
+      "steps_count": 10,
+      "duration_ms": 111288.89,
+      "error": "Max steps exceeded",
+      "app_context": null,
+      "tags": [],
+      "created_at": "2026-01-09T15:29:21.910123",
+      "used_count": 0
+    },
+    {
+      "id": "exp_20260109_153451_5",
+      "task": "Take a screenshot",
+      "task_hash": "4509923039aa",
+      "success": true,
+      "actions": [
+        {
+          "action_type": "hotkey",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": true
+        },
+        {
+          "action_type": "press",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": true
+        },
+        {
+          "action_type": "done",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": false
+        }
+      ],
+      "steps_count": 3,
+      "duration_ms": 21620.674000000003,
+      "error": null,
+      "app_context": null,
+      "tags": [],
+      "created_at": "2026-01-09T15:34:51.280516",
+      "used_count": 0
+    },
+    {
+      "id": "exp_20260109_153647_6",
+      "task": "Open Calculator",
+      "task_hash": "19f836ff2c78",
+      "success": false,
+      "actions": [
+        {
+          "action_type": "click",
+          "target": "Windows Start menu icon on the taskbar",
+          "text": null,
+          "coordinates": [
+            1883,
+            1063
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "Windows Start button on the taskbar",
+          "text": null,
+          "coordinates": [
+            188,
+            1063
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "Start menu button on the Windows taskbar",
+          "text": null,
+          "coordinates": null,
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "Windows Start button on the taskbar",
+          "text": null,
+          "coordinates": [
+            188,
+            1063
+          ],
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "Start button on the taskbar",
+          "text": null,
+          "coordinates": [
+            185,
+            1079
+          ],
+          "success": true
+        },
+        {
+          "action_type": "hotkey",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": true
+        },
+        {
+          "action_type": "hotkey",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": true
+        },
+        {
+          "action_type": "type",
+          "target": "运行对话框的输入框",
+          "text": "calc",
+          "coordinates": [
+            85,
+            868
+          ],
+          "success": true
+        },
+        {
+          "action_type": "press",
+          "target": null,
+          "text": null,
+          "coordinates": null,
+          "success": true
+        },
+        {
+          "action_type": "click",
+          "target": "Windows任务栏中的搜索图标或开始按钮",
+          "text": "",
+          "coordinates": [
+            20,
+            1060
+          ],
+          "success": true
+        }
+      ],
+      "steps_count": 10,
+      "duration_ms": 104590.165,
+      "error": "Max steps exceeded",
+      "app_context": null,
+      "tags": [],
+      "created_at": "2026-01-09T15:36:47.721683",
+      "used_count": 0
+    }
+  ]
+}

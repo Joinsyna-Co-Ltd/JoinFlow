@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "updated_at": "2026-01-09T14:37:56.165654",
+  "experiences": [
+    {
+      "id": "exp_20260109_143756_0",
+      "task": "open notepad",
+      "task_hash": "929f02d8792e",
+      "success": true,
+      "actions": [
+        {
+          "action_type": "click",
+          "target": "start button",
+          "text": null,
+          "coordinates": null,
+          "success": true
+        }
+      ],
+      "steps_count": 1,
+      "duration_ms": 1000,
+      "error": null,
+      "app_context": null,
+      "tags": [],
+      "created_at": "2026-01-09T14:37:56.165641",
+      "used_count": 0
+    }
+  ]
+}

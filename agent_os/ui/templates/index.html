@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent OS - 智能操作系统代理</title>
+    <link rel="stylesheet" href="/static/css/agent-os.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="agent-os-app">
+        <!-- 动态背景 -->
+        <div class="dynamic-bg">
+            <div class="neural-grid"></div>
+            <div class="pulse-rings">
+                <div class="pulse-ring"></div>
+                <div class="pulse-ring"></div>
+                <div class="pulse-ring"></div>
+            </div>
+            <div class="floating-particles" id="particles"></div>
+        </div>
+        
+        <!-- 侧边导航栏 -->
+        <aside class="nav-sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <div class="brand-logo">
+                        <div class="logo-inner">
+                            <svg viewBox="0 0 48 48" fill="none">
+                                <circle cx="24" cy="24" r="20" stroke="url(#logoGradient)" stroke-width="2"/>
+                                <circle cx="24" cy="24" r="12" stroke="url(#logoGradient)" stroke-width="2" stroke-dasharray="4 3"/>
+                                <circle cx="24" cy="24" r="5" fill="url(#logoGradient)"/>
+                                <path d="M24 4v8M24 36v8M4 24h8M36 24h8" stroke="url(#logoGradient)" stroke-width="2" stroke-linecap="round"/>
+                                <defs>
+                                    <linearGradient id="logoGradient" x1="0" y1="0" x2="48" y2="48">
+                                        <stop offset="0%" stop-color="#00E5FF"/>
+                                        <stop offset="100%" stop-color="#7C4DFF"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                        <div class="logo-glow"></div>
+                    </div>
+                    <div class="brand-text">
+                        <h1>Agent OS</h1>
+                        <span class="version">v2.5 Neural</span>
+                    </div>
+                </div>
+                <button class="sidebar-toggle" onclick="AgentOS.toggleSidebar()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- 系统状态指示器 -->
+            <div class="system-status-bar">
+                <div class="status-indicator online">
+                    <div class="status-pulse"></div>
+                    <span>系统就绪</span>
+                </div>
+                <div class="status-metrics">
+                    <div class="metric-item">
+                        <span class="metric-value" id="sidebarCpu">--%</span>
+                        <span class="metric-label">CPU</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-value" id="sidebarMem">--%</span>
+                        <span class="metric-label">内存</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 导航菜单 -->
+            <nav class="nav-menu">
+                <div class="nav-section">
+                    <span class="nav-section-title">核心功能</span>
+                    <a href="#" class="nav-item active" data-panel="terminal">
+                        <div class="nav-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="4 17 10 11 4 5"/>
+                                <line x1="12" y1="19" x2="20" y2="19"/>
+                            </svg>
+                        </div>
+                        <span class="nav-text">智能终端</span>
+                        <span class="nav-indicator"></span>
+                    </a>
+                    <a href="#" class="nav-item" data-panel="workflow">
+                        <div class="nav-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="6" cy="6" r="3"/>
+                                <circle cx="18" cy="18" r="3"/>
+                                <path d="M6 21V9a6 6 0 006 6h3"/>
+                                <path d="M18 3v12"/>
+                            </svg>
+                        </div>
+                        <span class="nav-text">工作流</span>
+                    </a>
+                    <a href="#" class="nav-item" data-panel="files">
+                        <div class="nav-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                            </svg>
+                        </div>
+                        <span class="nav-text">文件管理</span>
+                    </a>
+                    <a href="#" class="nav-item" data-panel="browser">
+                        <div class="nav-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="2" y1="12" x2="22" y2="12"/>
+                                <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+                            </svg>
+                        </div>
+                        <span class="nav-text">浏览器</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <span class="nav-section-title">系统监控</span>
+                    <a href="#" class="nav-item" data-panel="monitor">
+                        <div class="nav-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                            </svg>
+                        </div>
+                        <span class="nav-text">性能监控</span>
+                    </a>
+                    <a href="#" class="nav-item" data-panel="processes">
+                        <div class="nav-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="4" y="4" width="16" height="16" rx="2"/>
+                                <rect x="9" y="9" width="6" height="6"/>
+                                <line x1="9" y1="1" x2="9" y2="4"/>
+                                <line x1="15" y1="1" x2="15" y2="4"/>
+                                <line x1="9" y1="20" x2="9" y2="23"/>
+                                <line x1="15" y1="20" x2="15" y2="23"/>
+                            </svg>
+                        </div>
+                        <span class="nav-text">进程管理</span>
+                    </a>
+                    <a href="#" class="nav-item" data-panel="history">
+                        <div class="nav-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                        </div>
+                        <span class="nav-text">执行历史</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <span class="nav-section-title">配置</span>
+                    <a href="#" class="nav-item" data-panel="settings">
+                        <div class="nav-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                            </svg>
+                        </div>
+                        <span class="nav-text">系统设置</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <!-- 侧边栏底部 -->
+            <div class="sidebar-footer">
+                <div class="ai-badge">
+                    <div class="ai-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M2 17l10 5 10-5"/>
+                            <path d="M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <div class="ai-info">
+                        <span class="ai-status">AI 引擎</span>
+                        <span class="ai-model">Neural Core</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 顶部栏 -->
+            <header class="top-bar">
+                <div class="top-left">
+                    <button class="mobile-menu-btn" onclick="AgentOS.toggleMobileSidebar()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="3" y1="12" x2="21" y2="12"/>
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                            <line x1="3" y1="18" x2="21" y2="18"/>
+                        </svg>
+                    </button>
+                    <div class="breadcrumb">
+                        <span class="crumb-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="4 17 10 11 4 5"/>
+                                <line x1="12" y1="19" x2="20" y2="19"/>
+                            </svg>
+                        </span>
+                        <h2 id="pageTitle">智能终端</h2>
+                    </div>
+                </div>
+                
+                <div class="top-center">
+                    <div class="command-search" onclick="AgentOS.showCommandPalette()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <span>搜索命令、文件、应用...</span>
+                        <kbd>Ctrl+K</kbd>
+                    </div>
+                </div>
+                
+                <div class="top-right">
+                    <div class="quick-actions">
+                        <button class="action-btn" title="截图" onclick="AgentOS.screenshot()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                        </button>
+                        <button class="action-btn has-badge" title="通知" onclick="AgentOS.toggleNotifications()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                                <path d="M13.73 21a2 2 0 01-3.46 0"/>
+                            </svg>
+                            <span class="badge">2</span>
+                        </button>
+                        <button class="action-btn theme-toggle" title="切换主题" onclick="AgentOS.toggleTheme()">
+                            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="5"/>
+                                <line x1="12" y1="1" x2="12" y2="3"/>
+                                <line x1="12" y1="21" x2="12" y2="23"/>
+                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                                <line x1="1" y1="12" x2="3" y2="12"/>
+                                <line x1="21" y1="12" x2="23" y2="12"/>
+                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                            </svg>
+                            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="user-menu">
+                        <div class="user-avatar">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- 面板容器 -->
+            <div class="panels-wrapper">
+                <!-- 智能终端面板 -->
+                <section class="panel active" id="terminal-panel">
+                    <div class="terminal-layout">
+                        <!-- 聊天区域 -->
+                        <div class="chat-area">
+                            <div class="chat-container" id="chatContainer">
+                                <!-- 欢迎界面 -->
+                                <div class="welcome-hero" id="welcomeHero">
+                                    <div class="hero-visual">
+                                        <div class="hero-orb">
+                                            <div class="orb-core"></div>
+                                            <div class="orb-ring ring-1"></div>
+                                            <div class="orb-ring ring-2"></div>
+                                            <div class="orb-ring ring-3"></div>
+                                            <div class="orb-particles"></div>
+                                        </div>
+                                    </div>
+                                    <div class="hero-content">
+                                        <h1 class="hero-title">
+                                            <span class="title-line">欢迎使用</span>
+                                            <span class="title-gradient">Agent OS</span>
+                                        </h1>
+                                        <p class="hero-subtitle">您的智能操作系统代理，随时为您服务</p>
+                                    </div>
+                                    
+                                    <!-- 能力展示 -->
+                                    <div class="capabilities-showcase">
+                                        <div class="capability-card" onclick="AgentOS.quickAction('打开记事本')">
+                                            <div class="card-icon">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <rect x="3" y="3" width="7" height="7"/>
+                                                    <rect x="14" y="3" width="7" height="7"/>
+                                                    <rect x="14" y="14" width="7" height="7"/>
+                                                    <rect x="3" y="14" width="7" height="7"/>
+                                                </svg>
+                                            </div>
+                                            <div class="card-content">
+                                                <h3>应用控制</h3>
+                                                <p>智能启动和管理系统应用</p>
+                                            </div>
+                                            <div class="card-arrow">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                                    <polyline points="12 5 19 12 12 19"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="capability-card" onclick="AgentOS.quickAction('查找桌面上的文件')">
+                                            <div class="card-icon">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <circle cx="11" cy="11" r="8"/>
+                                                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                                                </svg>
+                                            </div>
+                                            <div class="card-content">
+                                                <h3>智能搜索</h3>
+                                                <p>快速定位文件和应用程序</p>
+                                            </div>
+                                            <div class="card-arrow">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                                    <polyline points="12 5 19 12 12 19"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="capability-card" onclick="AgentOS.quickAction('打开浏览器搜索Python教程')">
+                                            <div class="card-icon">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <circle cx="12" cy="12" r="10"/>
+                                                    <line x1="2" y1="12" x2="22" y2="12"/>
+                                                    <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+                                                </svg>
+                                            </div>
+                                            <div class="card-content">
+                                                <h3>网络浏览</h3>
+                                                <p>控制浏览器进行网页操作</p>
+                                            </div>
+                                            <div class="card-arrow">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                                    <polyline points="12 5 19 12 12 19"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="capability-card" onclick="AgentOS.quickAction('系统信息')">
+                                            <div class="card-icon">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <rect x="2" y="3" width="20" height="14" rx="2"/>
+                                                    <line x1="8" y1="21" x2="16" y2="21"/>
+                                                    <line x1="12" y1="17" x2="12" y2="21"/>
+                                                </svg>
+                                            </div>
+                                            <div class="card-content">
+                                                <h3>系统管理</h3>
+                                                <p>监控和管理系统资源</p>
+                                            </div>
+                                            <div class="card-arrow">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                                    <polyline points="12 5 19 12 12 19"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 快捷命令 -->
+                                    <div class="quick-commands">
+                                        <span class="commands-label">快速开始：</span>
+                                        <div class="command-chips">
+                                            <button class="chip" onclick="AgentOS.quickAction('截图保存到桌面')">
+                                                <span>📸</span> 截图
+                                            </button>
+                                            <button class="chip" onclick="AgentOS.quickAction('打开计算器')">
+                                                <span>🔢</span> 计算器
+                                            </button>
+                                            <button class="chip" onclick="AgentOS.quickAction('获取剪贴板内容')">
+                                                <span>📋</span> 剪贴板
+                                            </button>
+                                            <button class="chip" onclick="AgentOS.quickAction('帮助')">
+                                                <span>❓</span> 帮助
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 消息列表 -->
+                                <div class="messages-list" id="messagesList"></div>
+                            </div>
+                            
+                            <!-- 输入区域 -->
+                            <div class="input-area">
+                                <div class="input-wrapper">
+                                    <div class="input-prefix">
+                                        <div class="prefix-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <polyline points="4 17 10 11 4 5"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="input-field">
+                                        <textarea 
+                                            id="commandInput" 
+                                            placeholder="输入您的指令，我将智能理解并执行..."
+                                            rows="1"
+                                            onkeydown="AgentOS.handleKeyDown(event)"
+                                            oninput="AgentOS.handleInput(event)"
+                                        ></textarea>
+                                    </div>
+                                    <div class="input-actions">
+                                        <button class="input-btn voice-btn" title="语音输入" onclick="AgentOS.startVoice()">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+                                                <path d="M19 10v2a7 7 0 01-14 0v-2"/>
+                                                <line x1="12" y1="19" x2="12" y2="23"/>
+                                                <line x1="8" y1="23" x2="16" y2="23"/>
+                                            </svg>
+                                        </button>
+                                        <button class="input-btn attach-btn" title="附加文件" onclick="AgentOS.attachFile()">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+                                            </svg>
+                                        </button>
+                                        <button class="input-btn send-btn" title="发送 (Enter)" onclick="AgentOS.send()">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <line x1="22" y1="2" x2="11" y2="13"/>
+                                                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="input-hints">
+                                    <span><kbd>Enter</kbd> 发送</span>
+                                    <span><kbd>Shift + Enter</kbd> 换行</span>
+                                    <span><kbd>↑</kbd><kbd>↓</kbd> 历史命令</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 右侧信息面板 -->
+                        <aside class="info-panel">
+                            <!-- 系统概览 -->
+                            <div class="info-card system-overview">
+                                <div class="card-header">
+                                    <h3>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                                        </svg>
+                                        系统状态
+                                    </h3>
+                                    <button class="refresh-btn" onclick="AgentOS.refreshSystemInfo()" title="刷新">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="23 4 23 10 17 10"/>
+                                            <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="metrics-grid">
+                                    <div class="metric-card cpu">
+                                        <div class="metric-visual">
+                                            <svg class="progress-ring" viewBox="0 0 44 44">
+                                                <circle class="ring-bg" cx="22" cy="22" r="18" fill="none" stroke-width="4"/>
+                                                <circle class="ring-progress" id="cpuRing" cx="22" cy="22" r="18" fill="none" stroke-width="4" stroke-dasharray="0 113"/>
+                                            </svg>
+                                            <span class="metric-percent" id="cpuPercent">--%</span>
+                                        </div>
+                                        <span class="metric-name">CPU</span>
+                                    </div>
+                                    <div class="metric-card memory">
+                                        <div class="metric-visual">
+                                            <svg class="progress-ring" viewBox="0 0 44 44">
+                                                <circle class="ring-bg" cx="22" cy="22" r="18" fill="none" stroke-width="4"/>
+                                                <circle class="ring-progress" id="memRing" cx="22" cy="22" r="18" fill="none" stroke-width="4" stroke-dasharray="0 113"/>
+                                            </svg>
+                                            <span class="metric-percent" id="memPercent">--%</span>
+                                        </div>
+                                        <span class="metric-name">内存</span>
+                                    </div>
+                                    <div class="metric-card disk">
+                                        <div class="metric-visual">
+                                            <svg class="progress-ring" viewBox="0 0 44 44">
+                                                <circle class="ring-bg" cx="22" cy="22" r="18" fill="none" stroke-width="4"/>
+                                                <circle class="ring-progress" id="diskRing" cx="22" cy="22" r="18" fill="none" stroke-width="4" stroke-dasharray="0 113"/>
+                                            </svg>
+                                            <span class="metric-percent" id="diskPercent">--%</span>
+                                        </div>
+                                        <span class="metric-name">磁盘</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 最近任务 -->
+                            <div class="info-card recent-tasks">
+                                <div class="card-header">
+                                    <h3>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                                            <rect x="9" y="3" width="6" height="4" rx="1"/>
+                                            <line x1="12" y1="12" x2="12" y2="16"/>
+                                            <line x1="10" y1="14" x2="14" y2="14"/>
+                                        </svg>
+                                        最近任务
+                                    </h3>
+                                    <span class="task-badge" id="taskCount">0</span>
+                                </div>
+                                <div class="tasks-list" id="tasksList">
+                                    <div class="empty-tasks">
+                                        <div class="empty-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                                                <rect x="9" y="3" width="6" height="4" rx="1"/>
+                                                <path d="M9 14l2 2 4-4"/>
+                                            </svg>
+                                        </div>
+                                        <p>暂无任务记录</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 命令提示 -->
+                            <div class="info-card command-suggestions">
+                                <div class="card-header">
+                                    <h3>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <line x1="12" y1="16" x2="12" y2="12"/>
+                                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                                        </svg>
+                                        常用命令
+                                    </h3>
+                                </div>
+                                <div class="suggestions-list">
+                                    <div class="suggestion-item" onclick="AgentOS.quickAction('打开浏览器')">
+                                        <code>打开浏览器</code>
+                                        <span>启动默认浏览器</span>
+                                    </div>
+                                    <div class="suggestion-item" onclick="AgentOS.quickAction('搜索 PDF 文件')">
+                                        <code>搜索 PDF 文件</code>
+                                        <span>查找PDF文档</span>
+                                    </div>
+                                    <div class="suggestion-item" onclick="AgentOS.quickAction('创建文件夹 新项目')">
+                                        <code>创建文件夹</code>
+                                        <span>创建新目录</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </section>
+                
+                <!-- 性能监控面板 -->
+                <section class="panel" id="monitor-panel">
+                    <div class="monitor-dashboard">
+                        <div class="monitor-grid">
+                            <div class="monitor-card large cpu-card">
+                                <div class="card-header">
+                                    <div class="card-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                                        </svg>
+                                        <span>CPU 使用率</span>
+                                    </div>
+                                    <span class="card-value" id="monitorCpuValue">--%</span>
+                                </div>
+                                <div class="chart-area" id="cpuChart">
+                                    <div class="chart-placeholder">
+                                        <div class="chart-line"></div>
+                                    </div>
+                                </div>
+                                <div class="card-stats">
+                                    <div class="stat">
+                                        <span class="stat-label">核心数</span>
+                                        <span class="stat-value" id="cpuCores">--</span>
+                                    </div>
+                                    <div class="stat">
+                                        <span class="stat-label">频率</span>
+                                        <span class="stat-value" id="cpuFreq">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="monitor-card large memory-card">
+                                <div class="card-header">
+                                    <div class="card-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="4" y="4" width="16" height="16" rx="2"/>
+                                            <rect x="9" y="9" width="6" height="6"/>
+                                        </svg>
+                                        <span>内存使用</span>
+                                    </div>
+                                    <span class="card-value" id="monitorMemValue">--%</span>
+                                </div>
+                                <div class="chart-area" id="memChart">
+                                    <div class="chart-placeholder">
+                                        <div class="chart-line"></div>
+                                    </div>
+                                </div>
+                                <div class="card-stats">
+                                    <div class="stat">
+                                        <span class="stat-label">已使用</span>
+                                        <span class="stat-value" id="memUsed">--</span>
+                                    </div>
+                                    <div class="stat">
+                                        <span class="stat-label">总计</span>
+                                        <span class="stat-value" id="memTotal">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="monitor-card disk-card">
+                                <div class="card-header">
+                                    <div class="card-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                                            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                                            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                                        </svg>
+                                        <span>磁盘空间</span>
+                                    </div>
+                                    <span class="card-value" id="monitorDiskValue">--%</span>
+                                </div>
+                                <div class="disk-bar-wrapper">
+                                    <div class="disk-bar">
+                                        <div class="disk-used" id="monitorDiskBar"></div>
+                                    </div>
+                                </div>
+                                <div class="card-stats">
+                                    <div class="stat">
+                                        <span class="stat-label">已使用</span>
+                                        <span class="stat-value" id="diskUsed">--</span>
+                                    </div>
+                                    <div class="stat">
+                                        <span class="stat-label">可用</span>
+                                        <span class="stat-value" id="diskFree">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="monitor-card system-info-card">
+                                <div class="card-header">
+                                    <div class="card-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <line x1="12" y1="16" x2="12" y2="12"/>
+                                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                                        </svg>
+                                        <span>系统信息</span>
+                                    </div>
+                                </div>
+                                <div class="system-info-list" id="systemInfoList">
+                                    <!-- 动态加载 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 文件管理面板 -->
+                <section class="panel" id="files-panel">
+                    <div class="files-explorer">
+                        <div class="files-header">
+                            <div class="path-navigation">
+                                <button class="nav-btn" onclick="AgentOS.navigateBack()" title="返回">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="15 18 9 12 15 6"/>
+                                    </svg>
+                                </button>
+                                <button class="nav-btn" onclick="AgentOS.navigateUp()" title="上级目录">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="18 15 12 9 6 15"/>
+                                    </svg>
+                                </button>
+                                <div class="path-breadcrumb" id="pathBreadcrumb">
+                                    <span class="path-segment" onclick="AgentOS.navigateTo('~')">主目录</span>
+                                </div>
+                            </div>
+                            <div class="files-tools">
+                                <button class="tool-btn" onclick="AgentOS.createFolder()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                                        <line x1="12" y1="11" x2="12" y2="17"/>
+                                        <line x1="9" y1="14" x2="15" y2="14"/>
+                                    </svg>
+                                    <span>新建文件夹</span>
+                                </button>
+                                <button class="tool-btn" onclick="AgentOS.refreshFiles()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="23 4 23 10 17 10"/>
+                                        <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+                                    </svg>
+                                    <span>刷新</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="files-content" id="filesContent">
+                            <!-- 文件列表 -->
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 执行历史面板 -->
+                <section class="panel" id="history-panel">
+                    <div class="history-view">
+                        <div class="history-header">
+                            <h3>执行历史</h3>
+                            <button class="clear-btn" onclick="AgentOS.clearHistory()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                                </svg>
+                                <span>清空历史</span>
+                            </button>
+                        </div>
+                        <div class="history-list" id="historyList">
+                            <!-- 历史记录 -->
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 设置面板 -->
+                <section class="panel" id="settings-panel">
+                    <div class="settings-view">
+                        <div class="settings-section">
+                            <h3>外观设置</h3>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <span class="setting-title">深色模式</span>
+                                    <span class="setting-desc">启用深色界面主题</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="darkModeSwitch" checked onchange="AgentOS.updateSettings()">
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <span class="setting-title">动画效果</span>
+                                    <span class="setting-desc">启用界面动画和过渡效果</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="animationsSwitch" checked onchange="AgentOS.updateSettings()">
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h3>Agent 设置</h3>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <span class="setting-title">自动确认</span>
+                                    <span class="setting-desc">自动确认低风险操作</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="autoConfirmSwitch" onchange="AgentOS.updateSettings()">
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <span class="setting-title">声音提示</span>
+                                    <span class="setting-desc">任务完成时播放提示音</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="soundSwitch" checked onchange="AgentOS.updateSettings()">
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h3>关于</h3>
+                            <div class="about-info">
+                                <div class="about-logo">
+                                    <svg viewBox="0 0 48 48" fill="none">
+                                        <circle cx="24" cy="24" r="20" stroke="url(#aboutGradient)" stroke-width="2"/>
+                                        <circle cx="24" cy="24" r="12" stroke="url(#aboutGradient)" stroke-width="2" stroke-dasharray="4 3"/>
+                                        <circle cx="24" cy="24" r="5" fill="url(#aboutGradient)"/>
+                                        <defs>
+                                            <linearGradient id="aboutGradient" x1="0" y1="0" x2="48" y2="48">
+                                                <stop offset="0%" stop-color="#00E5FF"/>
+                                                <stop offset="100%" stop-color="#7C4DFF"/>
+                                            </linearGradient>
+                                        </defs>
+                                    </svg>
+                                </div>
+                                <div class="about-text">
+                                    <h4>Agent OS</h4>
+                                    <p>Version 2.5 Neural</p>
+                                    <p class="copyright">© 2025 JoinFlow</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 加载遮罩 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-dot"></div>
+            </div>
+            <p class="loading-text">Agent 正在处理...</p>
+            <div class="loading-bar">
+                <div class="bar-progress"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 通知容器 -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <!-- 命令面板 -->
+    <div class="command-palette" id="commandPalette">
+        <div class="palette-backdrop" onclick="AgentOS.hideCommandPalette()"></div>
+        <div class="palette-dialog">
+            <div class="palette-search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" id="paletteInput" placeholder="输入命令或搜索..." onkeyup="AgentOS.filterPalette(event)">
+                <kbd>ESC</kbd>
+            </div>
+            <div class="palette-results" id="paletteResults">
+                <!-- 动态内容 -->
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/js/agent-os.js"></script>
+</body>
+</html>

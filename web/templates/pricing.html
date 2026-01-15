@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark" class="scrollable-page">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JoinFlow - 定价方案</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Base Styles -->
+  <link rel="stylesheet" href="/static/css/style.css?v=20260108b">
+  
+  <style>
+    /* Critical: Override body overflow for pricing page - must have highest priority */
+    html.scrollable-page,
+    html.scrollable-page body,
+    html.scrollable-page body.scrollable-page,
+    body.scrollable-page {
+      overflow: auto !important;
+      overflow-y: scroll !important;
+      overflow-x: hidden !important;
+      height: auto !important;
+      min-height: 100vh !important;
+      max-height: none !important;
+      position: static !important;
+    }
+    
+    /* Pricing Page Specific Styles */
+    .pricing-page {
+      min-height: auto;
+      background: var(--bg-primary);
+      overflow: visible;
+      height: auto;
+      position: relative;
+    }
+    
+    /* Header */
+    .pricing-header {
+      padding: var(--spacing-lg) var(--spacing-xl);
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .pricing-header .logo {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      text-decoration: none;
+    }
+    
+    .pricing-header .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: white;
+    }
+    
+    .pricing-header .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .pricing-header-actions {
+      display: flex;
+      gap: var(--spacing-md);
+      align-items: center;
+    }
+    
+    /* Hero Section */
+    .pricing-hero {
+      text-align: center;
+      padding: var(--spacing-2xl) var(--spacing-xl);
+      background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+    }
+    
+    .pricing-hero h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: var(--spacing-md);
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .pricing-hero p {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto var(--spacing-xl);
+    }
+    
+    /* Billing Toggle */
+    .billing-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      background: var(--bg-tertiary);
+      padding: var(--spacing-xs);
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-color);
+    }
+    
+    .billing-option {
+      padding: var(--spacing-sm) var(--spacing-lg);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: all var(--transition-fast);
+      position: relative;
+    }
+    
+    .billing-option.active {
+      background: var(--gradient-primary);
+      color: white;
+    }
+    
+    .billing-option:hover:not(.active) {
+      color: var(--text-primary);
+    }
+    
+    .billing-save {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: var(--accent-success);
+      color: white;
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+    }
+    
+    /* Pricing Grid */
+    .pricing-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--spacing-xl);
+    }
+    
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--spacing-lg);
+      margin-top: var(--spacing-xl);
+    }
+    
+    @media (max-width: 1200px) {
+      .pricing-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* Pricing Card */
+    .pricing-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: var(--spacing-xl);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: all var(--transition-fast);
+    }
+    
+    .pricing-card:hover {
+      border-color: var(--accent-primary);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .pricing-card.popular {
+      border-color: var(--accent-primary);
+      background: linear-gradient(180deg, rgba(88, 166, 255, 0.08) 0%, var(--bg-secondary) 100%);
+    }
+    
+    .pricing-card.popular::before {
+      content: '最受欢迎';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--gradient-primary);
+      color: white;
+      padding: var(--spacing-xs) var(--spacing-md);
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .pricing-card.enterprise {
+      background: linear-gradient(180deg, rgba(163, 113, 247, 0.08) 0%, var(--bg-secondary) 100%);
+      border-color: var(--accent-secondary);
+    }
+    
+    .plan-header {
+      text-align: center;
+      margin-bottom: var(--spacing-lg);
+      padding-bottom: var(--spacing-lg);
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .plan-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto var(--spacing-md);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    
+    .pricing-card:nth-child(1) .plan-icon {
+      background: rgba(139, 148, 158, 0.15);
+      color: var(--text-secondary);
+    }
+    
+    .pricing-card:nth-child(2) .plan-icon {
+      background: rgba(88, 166, 255, 0.15);
+      color: var(--accent-primary);
+    }
+    
+    .pricing-card:nth-child(3) .plan-icon {
+      background: rgba(63, 185, 80, 0.15);
+      color: var(--accent-success);
+    }
+    
+    .pricing-card:nth-child(4) .plan-icon {
+      background: rgba(163, 113, 247, 0.15);
+      color: var(--accent-secondary);
+    }
+    
+    .plan-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: var(--spacing-xs);
+    }
+    
+    .plan-desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    
+    .plan-price {
+      text-align: center;
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .price-amount {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .price-currency {
+      font-size: 1.5rem;
+      color: var(--text-secondary);
+      margin-right: 4px;
+    }
+    
+    .price-period {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    
+    .price-yearly-note {
+      font-size: 0.8rem;
+      color: var(--accent-success);
+      margin-top: var(--spacing-xs);
+    }
+    
+    .plan-features {
+      flex: 1;
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm) 0;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    
+    .feature-item i {
+      color: var(--accent-success);
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    
+    .feature-item.disabled {
+      opacity: 0.5;
+    }
+    
+    .feature-item.disabled i {
+      color: var(--text-muted);
+    }
+    
+    .plan-action {
+      margin-top: auto;
+    }
+    
+    .plan-btn {
+      width: 100%;
+      padding: var(--spacing-md);
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+    }
+    
+    .plan-btn.primary {
+      background: var(--gradient-primary);
+      border: none;
+      color: white;
+    }
+    
+    .plan-btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-glow);
+    }
+    
+    .plan-btn.secondary {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+    
+    .plan-btn.secondary:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+    
+    .plan-btn.enterprise {
+      background: linear-gradient(135deg, var(--accent-secondary) 0%, #7c3aed 100%);
+      border: none;
+      color: white;
+    }
+    
+    /* Current Plan Badge */
+    .current-plan-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      padding: var(--spacing-xs) var(--spacing-md);
+      background: rgba(63, 185, 80, 0.15);
+      color: var(--accent-success);
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: var(--spacing-md);
+    }
+    
+    /* FAQ Section */
+    .faq-section {
+      max-width: 800px;
+      margin: var(--spacing-2xl) auto;
+      padding: 0 var(--spacing-xl);
+    }
+    
+    .faq-title {
+      text-align: center;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .faq-item {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--spacing-md);
+      overflow: hidden;
+    }
+    
+    .faq-question {
+      padding: var(--spacing-lg);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      transition: all var(--transition-fast);
+    }
+    
+    .faq-question:hover {
+      background: var(--bg-hover);
+    }
+    
+    .faq-question i {
+      transition: transform var(--transition-fast);
+      color: var(--text-muted);
+    }
+    
+    .faq-item.active .faq-question i {
+      transform: rotate(180deg);
+    }
+    
+    .faq-answer {
+      padding: 0 var(--spacing-lg) var(--spacing-lg);
+      color: var(--text-secondary);
+      line-height: 1.7;
+      display: none;
+    }
+    
+    .faq-item.active .faq-answer {
+      display: block;
+    }
+    
+    /* Comparison Section */
+    .comparison-section {
+      max-width: 1200px;
+      margin: var(--spacing-2xl) auto;
+      padding: 0 var(--spacing-xl);
+    }
+    
+    .comparison-title {
+      text-align: center;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .comparison-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+    
+    .comparison-table th,
+    .comparison-table td {
+      padding: var(--spacing-md);
+      text-align: center;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .comparison-table th {
+      background: var(--bg-tertiary);
+      font-weight: 600;
+    }
+    
+    .comparison-table th:first-child,
+    .comparison-table td:first-child {
+      text-align: left;
+      padding-left: var(--spacing-lg);
+    }
+    
+    .comparison-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .comparison-table .check {
+      color: var(--accent-success);
+    }
+    
+    .comparison-table .cross {
+      color: var(--text-muted);
+    }
+    
+    /* CTA Section */
+    .cta-section {
+      text-align: center;
+      padding: var(--spacing-2xl);
+      background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .cta-section h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .cta-section p {
+      color: var(--text-secondary);
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    /* Contact Modal */
+    .contact-form {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    .contact-form .form-group {
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    /* Footer */
+    .pricing-footer {
+      padding: var(--spacing-xl);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    
+    .pricing-footer a {
+      color: var(--accent-primary);
+      text-decoration: none;
+    }
+    
+    .pricing-footer a:hover {
+      text-decoration: underline;
+    }
+    
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .pricing-card {
+      animation: fadeInUp 0.5s ease-out;
+    }
+    
+    .pricing-card:nth-child(2) { animation-delay: 0.1s; }
+    .pricing-card:nth-child(3) { animation-delay: 0.2s; }
+    .pricing-card:nth-child(4) { animation-delay: 0.3s; }
+  </style>
+</head>
+<body class="scrollable-page">
+  <div class="pricing-page">
+    <!-- Header -->
+    <header class="pricing-header">
+      <a href="/" class="logo">
+        <div class="logo-icon">
+          <i class="fas fa-atom"></i>
+        </div>
+        <span class="logo-text">JoinFlow</span>
+      </a>
+      <div class="pricing-header-actions">
+        <a href="/" class="btn secondary">
+          <i class="fas fa-arrow-left"></i> 返回首页
+        </a>
+        <button class="btn primary" onclick="scrollToPlans()">
+          <i class="fas fa-rocket"></i> 立即升级
+        </button>
+      </div>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="pricing-hero">
+      <h1>选择适合您的方案</h1>
+      <p>从免费开始，随时升级。无论是个人用户还是企业团队，我们都有适合的方案。</p>
+      
+      <!-- Billing Toggle -->
+      <div class="billing-toggle">
+        <div class="billing-option active" data-cycle="monthly" onclick="setBillingCycle('monthly')">
+          月付
+        </div>
+        <div class="billing-option" data-cycle="yearly" onclick="setBillingCycle('yearly')">
+          年付
+          <span class="billing-save">省 17%</span>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Pricing Cards -->
+    <div class="pricing-container">
+      <div class="pricing-grid" id="pricingGrid">
+        <!-- Cards will be rendered by JavaScript -->
+        <div class="loading-state">
+          <i class="fas fa-spinner fa-spin"></i>
+          <span>加载定价方案...</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Comparison Table -->
+    <section class="comparison-section">
+      <h2 class="comparison-title">功能对比</h2>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>功能</th>
+            <th>免费版</th>
+            <th>专业版</th>
+            <th>团队版</th>
+            <th>企业版</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>每日任务数</td>
+            <td>5</td>
+            <td>无限</td>
+            <td>无限</td>
+            <td>无限</td>
+          </tr>
+          <tr>
+            <td>Agent 数量</td>
+            <td>2</td>
+            <td>6</td>
+            <td>6</td>
+            <td>6+自定义</td>
+          </tr>
+          <tr>
+            <td>导出格式</td>
+            <td>Markdown</td>
+            <td>全部</td>
+            <td>全部</td>
+            <td>全部+自定义</td>
+          </tr>
+          <tr>
+            <td>知识库文档数</td>
+            <td>10</td>
+            <td>100</td>
+            <td>1000</td>
+            <td>无限</td>
+          </tr>
+          <tr>
+            <td>并行任务数</td>
+            <td>1</td>
+            <td>3</td>
+            <td>5</td>
+            <td>无限</td>
+          </tr>
+          <tr>
+            <td>API 访问</td>
+            <td><i class="fas fa-times cross"></i></td>
+            <td><i class="fas fa-check check"></i></td>
+            <td><i class="fas fa-check check"></i></td>
+            <td><i class="fas fa-check check"></i></td>
+          </tr>
+          <tr>
+            <td>团队协作</td>
+            <td><i class="fas fa-times cross"></i></td>
+            <td><i class="fas fa-times cross"></i></td>
+            <td><i class="fas fa-check check"></i></td>
+            <td><i class="fas fa-check check"></i></td>
+          </tr>
+          <tr>
+            <td>私有化部署</td>
+            <td><i class="fas fa-times cross"></i></td>
+            <td><i class="fas fa-times cross"></i></td>
+            <td><i class="fas fa-times cross"></i></td>
+            <td><i class="fas fa-check check"></i></td>
+          </tr>
+          <tr>
+            <td>专属支持</td>
+            <td>社区</td>
+            <td>邮件</td>
+            <td>优先</td>
+            <td>专属</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    
+    <!-- FAQ Section -->
+    <section class="faq-section">
+      <h2 class="faq-title">常见问题</h2>
+      
+      <div class="faq-item active">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          可以随时取消订阅吗？
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          是的，您可以随时取消订阅。取消后，您仍可以使用付费功能直到当前计费周期结束。我们不会收取任何取消费用。
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          支持哪些支付方式？
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          我们支持微信支付、支付宝、银联卡以及国际信用卡（Visa、MasterCard）。企业用户还可以选择对公转账。
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          能否申请发票？
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          当然可以。付款成功后，您可以在账户设置中申请开具增值税普通发票或专用发票。
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          免费版有什么限制？
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          免费版每日可执行 5 个任务，仅支持浏览器和 LLM 两个基础 Agent，导出格式限制为 Markdown。适合轻度使用或体验产品功能。
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          如何升级或降级套餐？
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          您可以随时在账户设置中更改套餐。升级时，我们会按比例计算剩余时间并补差价。降级将在当前计费周期结束后生效。
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          企业版如何获取报价？
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          企业版根据您的具体需求定制价格。请点击"联系我们"按钮，填写您的需求，我们的销售团队会在 24 小时内与您联系。
+        </div>
+      </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="cta-section">
+      <h2>还有疑问？</h2>
+      <p>我们的团队随时为您解答，帮助您选择最适合的方案。</p>
+      <button class="btn primary" onclick="showContactModal()">
+        <i class="fas fa-envelope"></i> 联系我们
+      </button>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="pricing-footer">
+      <p>© 2024 JoinFlow. 保留所有权利。 | <a href="/terms">服务条款</a> | <a href="/privacy">隐私政策</a></p>
+    </footer>
+  </div>
+  
+  <!-- Contact Modal -->
+  <div class="modal-overlay" id="contactModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2><i class="fas fa-envelope"></i> 联系我们</h2>
+        <button class="modal-close" onclick="closeModal('contactModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="contact-form">
+          <div class="form-group">
+            <label>您的姓名</label>
+            <input type="text" id="contactName" placeholder="请输入您的姓名">
+          </div>
+          <div class="form-group">
+            <label>公司名称</label>
+            <input type="text" id="contactCompany" placeholder="请输入公司名称">
+          </div>
+          <div class="form-group">
+            <label>联系邮箱</label>
+            <input type="email" id="contactEmail" placeholder="请输入您的邮箱">
+          </div>
+          <div class="form-group">
+            <label>联系电话</label>
+            <input type="tel" id="contactPhone" placeholder="请输入您的电话">
+          </div>
+          <div class="form-group">
+            <label>需求描述</label>
+            <textarea id="contactMessage" rows="4" placeholder="请描述您的需求..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn secondary" onclick="closeModal('contactModal')">取消</button>
+        <button class="btn primary" onclick="submitContactForm()">
+          <i class="fas fa-paper-plane"></i> 发送
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Subscription Modal -->
+  <div class="modal-overlay" id="subscribeModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2><i class="fas fa-crown"></i> <span id="subscribePlanName">升级订阅</span></h2>
+        <button class="modal-close" onclick="closeModal('subscribeModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="subscribe-summary">
+          <div class="summary-row">
+            <span>套餐</span>
+            <span id="subscribeSelectedPlan">专业版</span>
+          </div>
+          <div class="summary-row">
+            <span>计费周期</span>
+            <span id="subscribeBillingCycle">月付</span>
+          </div>
+          <div class="summary-row total">
+            <span>总计</span>
+            <span id="subscribeTotal">¥99/月</span>
+          </div>
+        </div>
+        <div class="payment-methods">
+          <p style="margin-bottom: var(--spacing-md); color: var(--text-secondary);">选择支付方式：</p>
+          <div class="payment-option active" onclick="selectPayment('wechat')">
+            <i class="fab fa-weixin" style="color: #07c160;"></i>
+            <span>微信支付</span>
+          </div>
+          <div class="payment-option" onclick="selectPayment('alipay')">
+            <i class="fab fa-alipay" style="color: #00a0e9;"></i>
+            <span>支付宝</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn secondary" onclick="closeModal('subscribeModal')">取消</button>
+        <button class="btn primary" onclick="processPayment()">
+          <i class="fas fa-lock"></i> 确认支付
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .subscribe-summary {
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-md);
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: var(--spacing-sm) 0;
+      color: var(--text-secondary);
+    }
+    
+    .summary-row.total {
+      border-top: 1px solid var(--border-color);
+      margin-top: var(--spacing-sm);
+      padding-top: var(--spacing-md);
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-primary);
+    }
+    
+    .payment-methods {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+    
+    .payment-option {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md);
+      background: var(--bg-tertiary);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    
+    .payment-option:hover {
+      border-color: var(--accent-primary);
+    }
+    
+    .payment-option.active {
+      border-color: var(--accent-primary);
+      background: var(--bg-hover);
+    }
+    
+    .payment-option i {
+      font-size: 1.5rem;
+    }
+  </style>
+
+  <script>
+    // 当前计费周期
+    let billingCycle = 'monthly';
+    let selectedPlan = null;
+    let currentSubscription = null;
+    let pricingPlans = [];
+    
+    // 初始化
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadPricingPlans();
+      await loadCurrentSubscription();
+    });
+    
+    // 加载定价方案
+    async function loadPricingPlans() {
+      try {
+        const response = await fetch('/api/pricing');
+        const data = await response.json();
+        pricingPlans = data.plans;
+        renderPricingCards();
+      } catch (error) {
+        console.error('Failed to load pricing:', error);
+        // 使用默认数据
+        pricingPlans = getDefaultPlans();
+        renderPricingCards();
+      }
+    }
+    
+    // 加载当前订阅状态
+    async function loadCurrentSubscription() {
+      try {
+        const response = await fetch('/api/subscription');
+        const data = await response.json();
+        currentSubscription = data.subscription;
+        renderPricingCards();
+      } catch (error) {
+        console.error('Failed to load subscription:', error);
+      }
+    }
+    
+    // 默认计划（后备数据）
+    function getDefaultPlans() {
+      return [
+        {
+          id: 'free',
+          name: 'Free',
+          name_zh: '免费版',
+          type: 'free',
+          price_monthly: 0,
+          price_yearly: 0,
+          features_zh: ['每日 5 个任务', '基础浏览器 Agent', '基础 LLM Agent', '社区支持', 'Markdown 导出'],
+          is_popular: false,
+          is_enterprise: false
+        },
+        {
+          id: 'pro',
+          name: 'Pro',
+          name_zh: '专业版',
+          type: 'pro',
+          price_monthly: 99,
+          price_yearly: 999,
+          features_zh: ['无限任务', '全部 6 个 Agent', '优先执行', '邮件支持', '所有导出格式', '知识库 (100 文档)', 'API 访问', '自定义工作流'],
+          is_popular: true,
+          is_enterprise: false
+        },
+        {
+          id: 'team',
+          name: 'Team',
+          name_zh: '团队版',
+          type: 'team',
+          price_monthly: 299,
+          price_yearly: 2999,
+          features_zh: ['专业版全部功能', '最多 10 名团队成员', '团队协作', '共享工作流', '优先支持', '知识库 (1000 文档)', '高级分析', '自定义集成'],
+          is_popular: false,
+          is_enterprise: false
+        },
+        {
+          id: 'enterprise',
+          name: 'Enterprise',
+          name_zh: '企业版',
+          type: 'enterprise',
+          price_monthly: 0,
+          price_yearly: 0,
+          features_zh: ['团队版全部功能', '无限团队成员', 'SSO/SAML 单点登录', '专属支持', 'SLA 保证', '私有化部署', '定制开发', '培训与入门指导'],
+          is_popular: false,
+          is_enterprise: true
+        }
+      ];
+    }
+    
+    // 渲染定价卡片
+    function renderPricingCards() {
+      const grid = document.getElementById('pricingGrid');
+      const icons = ['fa-gift', 'fa-star', 'fa-users', 'fa-building'];
+      
+      grid.innerHTML = pricingPlans.map((plan, index) => {
+        const isCurrentPlan = currentSubscription && currentSubscription.plan_id === plan.id;
+        const price = billingCycle === 'yearly' ? plan.price_yearly : plan.price_monthly;
+        const period = billingCycle === 'yearly' ? '年' : '月';
+        
+        let cardClass = 'pricing-card';
+        if (plan.is_popular) cardClass += ' popular';
+        if (plan.is_enterprise) cardClass += ' enterprise';
+        
+        let buttonHtml = '';
+        if (isCurrentPlan) {
+          buttonHtml = `<div class="current-plan-badge"><i class="fas fa-check"></i> 当前方案</div>`;
+        } else if (plan.is_enterprise) {
+          buttonHtml = `<button class="plan-btn enterprise" onclick="showContactModal()">
+            <i class="fas fa-phone"></i> 联系我们
+          </button>`;
+        } else if (plan.type === 'free') {
+          buttonHtml = `<button class="plan-btn secondary" onclick="selectPlan('${plan.id}')">
+            免费使用
+          </button>`;
+        } else {
+          buttonHtml = `<button class="plan-btn primary" onclick="selectPlan('${plan.id}')">
+            <i class="fas fa-rocket"></i> 立即升级
+          </button>`;
+        }
+        
+        const priceHtml = plan.is_enterprise 
+          ? `<div class="price-amount">定制</div><div class="price-period">按需报价</div>`
+          : `<span class="price-currency">¥</span><span class="price-amount">${price}</span><span class="price-period">/${period}</span>
+             ${billingCycle === 'yearly' && price > 0 ? `<div class="price-yearly-note">相当于 ¥${Math.round(price/12)}/月</div>` : ''}`;
+        
+        return `
+          <div class="${cardClass}">
+            <div class="plan-header">
+              <div class="plan-icon">
+                <i class="fas ${icons[index]}"></i>
+              </div>
+              <div class="plan-name">${plan.name_zh}</div>
+              <div class="plan-desc">${getPlanDescription(plan.type)}</div>
+            </div>
+            <div class="plan-price">
+              ${priceHtml}
+            </div>
+            <div class="plan-features">
+              ${plan.features_zh.map(f => `
+                <div class="feature-item">
+                  <i class="fas fa-check"></i>
+                  <span>${f}</span>
+                </div>
+              `).join('')}
+            </div>
+            <div class="plan-action">
+              ${buttonHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // 获取方案描述
+    function getPlanDescription(type) {
+      const descriptions = {
+        'free': '适合个人轻度使用',
+        'pro': '适合专业用户和开发者',
+        'team': '适合小型团队协作',
+        'enterprise': '适合大型企业定制需求'
+      };
+      return descriptions[type] || '';
+    }
+    
+    // 设置计费周期
+    function setBillingCycle(cycle) {
+      billingCycle = cycle;
+      document.querySelectorAll('.billing-option').forEach(el => {
+        el.classList.remove('active');
+        if (el.dataset.cycle === cycle) {
+          el.classList.add('active');
+        }
+      });
+      renderPricingCards();
+    }
+    
+    // 选择方案
+    function selectPlan(planId) {
+      selectedPlan = pricingPlans.find(p => p.id === planId);
+      if (!selectedPlan) return;
+      
+      const price = billingCycle === 'yearly' ? selectedPlan.price_yearly : selectedPlan.price_monthly;
+      const period = billingCycle === 'yearly' ? '年' : '月';
+      
+      document.getElementById('subscribePlanName').textContent = `升级到${selectedPlan.name_zh}`;
+      document.getElementById('subscribeSelectedPlan').textContent = selectedPlan.name_zh;
+      document.getElementById('subscribeBillingCycle').textContent = billingCycle === 'yearly' ? '年付' : '月付';
+      document.getElementById('subscribeTotal').textContent = `¥${price}/${period}`;
+      
+      showModal('subscribeModal');
+    }
+    
+    // 选择支付方式
+    function selectPayment(method) {
+      document.querySelectorAll('.payment-option').forEach(el => {
+        el.classList.remove('active');
+      });
+      event.currentTarget.classList.add('active');
+    }
+    
+    // 处理支付
+    async function processPayment() {
+      if (!selectedPlan) return;
+      
+      try {
+        const response = await fetch('/api/subscription/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            plan_id: selectedPlan.id,
+            billing_cycle: billingCycle
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          closeModal('subscribeModal');
+          showNotification('订阅成功！', 'success');
+          await loadCurrentSubscription();
+        } else {
+          showNotification('订阅失败，请重试', 'error');
+        }
+      } catch (error) {
+        console.error('Payment error:', error);
+        showNotification('支付处理失败，请重试', 'error');
+      }
+    }
+    
+    // 滚动到方案区域
+    function scrollToPlans() {
+      document.getElementById('pricingGrid').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // 切换FAQ
+    function toggleFaq(element) {
+      const item = element.parentElement;
+      item.classList.toggle('active');
+    }
+    
+    // 显示联系表单
+    function showContactModal() {
+      showModal('contactModal');
+    }
+    
+    // 提交联系表单
+    function submitContactForm() {
+      const name = document.getElementById('contactName').value;
+      const email = document.getElementById('contactEmail').value;
+      
+      if (!name || !email) {
+        showNotification('请填写姓名和邮箱', 'error');
+        return;
+      }
+      
+      // 这里可以发送到后端
+      closeModal('contactModal');
+      showNotification('感谢您的咨询，我们会尽快与您联系！', 'success');
+    }
+    
+    // 显示弹窗
+    function showModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+    }
+    
+    // 关闭弹窗
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+    
+    // 显示通知
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+      `;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => notification.classList.add('show'), 100);
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
+

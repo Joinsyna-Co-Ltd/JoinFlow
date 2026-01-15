@@ -1,0 +1,577 @@
+{
+  "templates": [
+    {
+      "id": "tpl_research",
+      "name": "🔍 信息检索与整理",
+      "description": "搜索网络信息，分析整理成结构化报告",
+      "category": "research",
+      "icon": "fas fa-search",
+      "color": "#58a6ff",
+      "tags": [
+        "搜索",
+        "研究",
+        "报告"
+      ],
+      "steps": [
+        {
+          "id": "search",
+          "name": "搜索信息",
+          "description": "使用浏览器搜索相关信息",
+          "agent": "browser",
+          "prompt_template": "搜索关于 {topic} 的最新信息",
+          "input_mapping": {},
+          "output_key": "",
+          "condition": "",
+          "dependencies": [],
+          "timeout": 300,
+          "retry_count": 3
+        },
+        {
+          "id": "analyze",
+          "name": "分析整理",
+          "description": "分析搜索结果并整理成报告",
+          "agent": "llm",
+          "prompt_template": "根据搜索结果，整理关于 {topic} 的详细报告",
+          "input_mapping": {},
+          "output_key": "",
+          "condition": "",
+          "dependencies": [
+            "search"
+          ],
+          "timeout": 300,
+          "retry_count": 3
+        }
+      ],
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "description": "搜索主题（如：人工智能最新进展）"
+          }
+        },
+        "required": [
+          "topic"
+        ]
+      },
+      "output_template": "",
+      "use_count": 3,
+      "last_used": "2026-01-08T14:55:53.375749",
+      "is_system": true,
+      "is_public": true,
+      "created_at": "2026-01-08T11:12:04.015614",
+      "updated_at": "2026-01-08T11:12:04.015625",
+      "created_by": "default"
+    },
+    {
+      "id": "tpl_code_gen",
+      "name": "💻 代码生成与执行",
+      "description": "根据需求生成Python代码并执行验证",
+      "category": "code",
+      "icon": "fas fa-code",
+      "color": "#7c3aed",
+      "tags": [
+        "代码",
+        "开发",
+        "Python"
+      ],
+      "steps": [
+        {
+          "id": "generate",
+          "name": "生成代码",
+          "description": "根据需求生成代码",
+          "agent": "llm",
+          "prompt_template": "根据以下需求生成Python代码：\n{requirement}",
+          "input_mapping": {},
+          "output_key": "",
+          "condition": "",
+          "dependencies": [],
+          "timeout": 300,
+          "retry_count": 3
+        },
+        {
+          "id": "execute",
+          "name": "执行代码",
+          "description": "在安全沙盒中执行代码",
+          "agent": "code",
+          "prompt_template": "执行生成的代码",
+          "input_mapping": {},
+          "output_key": "",
+          "condition": "",
+          "dependencies": [
+            "generate"
+          ],
+          "timeout": 300,
+          "retry_count": 3
+        }
+      ],
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "requirement": {
+            "type": "string",
+            "description": "代码需求（如：计算斐波那契数列前20项）"
+          }
+        },
+        "required": [
+          "requirement"
+        ]
+      },
+      "output_template": "",
+      "use_count": 1,
+      "last_used": "2026-01-08T11:24:54.309731",
+      "is_system": true,
+      "is_public": true,
+      "created_at": "2026-01-08T11:12:04.015649",
+      "updated_at": "2026-01-08T11:12:04.015650",
+      "created_by": "default"
+    },
+    {
+      "id": "tpl_data_analysis",
+      "name": "📊 数据分析报告",
+      "description": "分析CSV/Excel数据文件，生成统计报告和图表",
+      "category": "data",
+      "icon": "fas fa-chart-bar",
+      "color": "#10b981",
+      "tags": [
+        "数据",
+        "分析",
+        "图表",
+        "Excel"
+      ],
+      "steps": [
+        {
+          "id": "load",
+          "name": "加载数据",
+          "description": "读取数据文件",
+          "agent": "data",
+          "prompt_template": "读取并分析文件：{file_path}",
+          "input_mapping": {},
+          "output_key": "",
+          "condition": "",
+          "dependencies": [],
+          "timeout": 300,
+          "retry_count": 3
+        },
+        {
+          "id": "analyze",
+          "name": "统计分析",
+          "description": "进行数据统计分析",
+          "agent": "data",
+          "prompt_template": "对数据进行统计分析，包括：均值、中位数、标准差等",
+          "input_mapping": {},
+          "output_key": "",
+          "condition": "",
+          "dependencies": [
+            "load"
+          ],
+          "timeout": 300,
+          "retry_count": 3
+        },
+        {
+          "id": "visualize",
+          "name": "生成图表",
+          "description": "生成数据可视化图表",
+          "agent": "data",
+          "prompt_template": "生成数据可视化图表",
+          "input_mapping": {},
+          "output_key": "",
+          "condition": "",
+          "dependencies": [
+            "analyze"
+          ],
+          "timeout": 300,
+          "retry_count": 3
+        }
+      ],
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "数据文件路径（CSV/Excel）"
+          }
+        },
+        "required": [
+          "file_path"
+        ]
+      },
+      "output_template": "",
+      "use_count": 1,
+      "last_used": "2026-01-08T11:16:39.513283",
+      "is_system": true,
+      "is_public": true,
+      "created_at": "2026-01-08T11:12:04.015668",
+      "updated_at": "2026-01-08T11:12:04.015668",
+      "created_by": "default"
+    },
+    {
+      "id": "tpl_file_batch",
+      "name": "📁 批量文件处理",
+      "description": "批量处理目录中的文件（重命名、转换、整理等）",
+      "category": "file",
+      "icon": "fas fa-folder-open",
+      "color": "#f59e0b",
+      "tags": [
+        "文件",
+        "批量",
+        "整理"
+      ],
+      "steps": [
+        {
+          "id": "list",
+          "name": "列出文件",
+          "description": "获取目录下的文件列表",
+          "agent": "os",
+          "prompt_template": "列出目录 {directory} 中的所有文件",
+          "input_mapping": {},
+          "output_key": "",
+          "condition": "",
+          "dependencies": [],
+          "timeout": 300,
+          "retry_count": 3
+        },
+        {
+          "id": "process",
+          "name": "处理文件",
+          "description": "对文件执行操作",
+          "agent": "os",
+          "prompt_template": "对文件执行 {operation} 操作",
+          "input_mapping": {},
+          "output_key": "",
+          "condition": "",
+          "dependencies": [
+            "list"
+          ],
+          "timeout": 300,
+          "retry_count": 3
+        }
+      ],
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "directory": {
+            "type": "string",
+            "description": "目录路径（如：./documents）"
+          },
+          "operation": {
+            "type": "string",
+            "description": "操作类型（如：按日期重命名）"
+          }
+        },
+        "required": [
+          "directory",
+          "operation"
+        ]
+      },
+      "output_template": "",
+      "use_count": 0,
+      "last_used": null,
+      "is_system": true,
+      "is_public": true,
+      "created_at": "2026-01-08T11:12:04.015681",
+      "updated_at": "2026-01-08T11:12:04.015681",
+      "created_by": "default"
+    },
+    {
+      "id": "tpl_web_scrape",
+      "name": "🌐 网页内容抓取",
+      "description": "抓取网页内容并提取关键信息",
+      "category": "research",
+      "icon": "fas fa-globe",
+      "color": "#06b6d4",
+      "tags": [
+        "网页",
+        "抓取",
+        "提取"
+      ],
+      "steps": [
+        {
+          "id": "fetch",
+          "name": "访问网页",
+          "description": "访问目标网页",
+          "agent": "browser",
+          "prompt_template": "访问网页 {url} 并获取内容",
+          "input_mapping": {},
+          "output_key": "",
+          "condition": "",
+          "dependencies": [],
+          "timeout": 300,
+          "retry_count": 3
+        },
+        {
+          "id": "extract",
+          "name": "提取信息",
+          "description": "从网页中提取关键信息",
+          "agent": "llm",
+          "prompt_template": "从网页内容中提取 {extract_target}",
+          "input_mapping": {},
+          "output_key": "",
+          "condition": "",
+          "dependencies": [
+            "fetch"
+          ],
+          "timeout": 300,
+          "retry_count": 3
+        }
+      ],
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "网页URL"
+          },
+          "extract_target": {
+            "type": "string",
+            "description": "要提取的信息（如：文章标题和摘要）"
+          }
+        },
+        "required": [
+          "url",
+          "extract_target"
+        ]
+      },
+      "output_template": "",
+      "use_count": 0,
+      "last_used": null,
+      "is_system": true,
+      "is_public": true,
+      "created_at": "2026-01-08T11:12:04.015687",
+      "updated_at": "2026-01-08T11:12:04.015687",
+      "created_by": "default"
+    },
+    {
+      "id": "tpl_text_process",
+      "name": "📝 文本处理",
+      "description": "对文本进行翻译、摘要、改写等处理",
+      "category": "automation",
+      "icon": "fas fa-file-alt",
+      "color": "#ec4899",
+      "tags": [
+        "文本",
+        "翻译",
+        "摘要"
+      ],
+      "steps": [
+        {
+          "id": "process",
+          "name": "处理文本",
+          "description": "对文本执行处理操作",
+          "agent": "llm",
+          "prompt_template": "对以下文本进行{action}：\n\n{text}",
+          "input_mapping": {},
+          "output_key": "",
+          "condition": "",
+          "dependencies": [],
+          "timeout": 300,
+          "retry_count": 3
+        }
+      ],
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "要处理的文本"
+          },
+          "action": {
+            "type": "string",
+            "description": "处理方式（翻译成英文/生成摘要/改写润色）"
+          }
+        },
+        "required": [
+          "text",
+          "action"
+        ]
+      },
+      "output_template": "",
+      "use_count": 0,
+      "last_used": null,
+      "is_system": true,
+      "is_public": true,
+      "created_at": "2026-01-08T11:12:04.015692",
+      "updated_at": "2026-01-08T11:12:04.015693",
+      "created_by": "default"
+    },
+    {
+      "id": "tpl_daily_report",
+      "name": "📋 每日报告生成",
+      "description": "收集信息并生成每日工作/新闻报告",
+      "category": "automation",
+      "icon": "fas fa-newspaper",
+      "color": "#8b5cf6",
+      "tags": [
+        "报告",
+        "自动化",
+        "每日"
+      ],
+      "steps": [
+        {
+          "id": "collect",
+          "name": "收集信息",
+          "description": "从多个来源收集信息",
+          "agent": "browser",
+          "prompt_template": "搜索 {topic} 的最新动态",
+          "input_mapping": {},
+          "output_key": "",
+          "condition": "",
+          "dependencies": [],
+          "timeout": 300,
+          "retry_count": 3
+        },
+        {
+          "id": "summarize",
+          "name": "整理摘要",
+          "description": "整理成报告格式",
+          "agent": "llm",
+          "prompt_template": "将收集的信息整理成结构化的每日报告",
+          "input_mapping": {},
+          "output_key": "",
+          "condition": "",
+          "dependencies": [
+            "collect"
+          ],
+          "timeout": 300,
+          "retry_count": 3
+        }
+      ],
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "description": "报告主题（如：AI行业动态）"
+          }
+        },
+        "required": [
+          "topic"
+        ]
+      },
+      "output_template": "",
+      "use_count": 0,
+      "last_used": null,
+      "is_system": true,
+      "is_public": true,
+      "created_at": "2026-01-08T11:12:04.015698",
+      "updated_at": "2026-01-08T11:12:04.015698",
+      "created_by": "default"
+    },
+    {
+      "id": "tpl_image_analyze",
+      "name": "🖼️ 图片分析",
+      "description": "分析图片内容，提取文字或描述",
+      "category": "data",
+      "icon": "fas fa-image",
+      "color": "#f472b6",
+      "tags": [
+        "图片",
+        "OCR",
+        "分析"
+      ],
+      "steps": [
+        {
+          "id": "analyze",
+          "name": "分析图片",
+          "description": "分析图片内容",
+          "agent": "vision",
+          "prompt_template": "分析图片 {image_path}，{task}",
+          "input_mapping": {},
+          "output_key": "",
+          "condition": "",
+          "dependencies": [],
+          "timeout": 300,
+          "retry_count": 3
+        }
+      ],
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "image_path": {
+            "type": "string",
+            "description": "图片路径"
+          },
+          "task": {
+            "type": "string",
+            "description": "分析任务（提取文字/描述内容/识别物体）",
+            "default": "描述图片内容"
+          }
+        },
+        "required": [
+          "image_path"
+        ]
+      },
+      "output_template": "",
+      "use_count": 0,
+      "last_used": null,
+      "is_system": true,
+      "is_public": true,
+      "created_at": "2026-01-08T11:12:04.015703",
+      "updated_at": "2026-01-08T11:12:04.015703",
+      "created_by": "default"
+    },
+    {
+      "id": "tpl_qa_knowledge",
+      "name": "📚 知识库问答",
+      "description": "基于知识库回答问题（RAG）",
+      "category": "research",
+      "icon": "fas fa-book-open",
+      "color": "#14b8a6",
+      "tags": [
+        "知识库",
+        "问答",
+        "RAG"
+      ],
+      "steps": [
+        {
+          "id": "search",
+          "name": "检索知识",
+          "description": "从知识库中检索相关内容",
+          "agent": "rag",
+          "prompt_template": "在知识库中搜索与 {question} 相关的内容",
+          "input_mapping": {},
+          "output_key": "",
+          "condition": "",
+          "dependencies": [],
+          "timeout": 300,
+          "retry_count": 3
+        },
+        {
+          "id": "answer",
+          "name": "生成答案",
+          "description": "基于检索结果生成答案",
+          "agent": "llm",
+          "prompt_template": "根据检索到的知识，回答问题：{question}",
+          "input_mapping": {},
+          "output_key": "",
+          "condition": "",
+          "dependencies": [
+            "search"
+          ],
+          "timeout": 300,
+          "retry_count": 3
+        }
+      ],
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "description": "要回答的问题"
+          }
+        },
+        "required": [
+          "question"
+        ]
+      },
+      "output_template": "",
+      "use_count": 0,
+      "last_used": null,
+      "is_system": true,
+      "is_public": true,
+      "created_at": "2026-01-08T11:12:04.015709",
+      "updated_at": "2026-01-08T11:12:04.015709",
+      "created_by": "default"
+    }
+  ]
+}
